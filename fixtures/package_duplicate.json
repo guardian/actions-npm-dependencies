@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@guardian/source-foundations": "8.0.0",
+    "@guardian/libs": "^12"
+  },
+  "devDependencies": {
+    "@guardian/libs": "^12"
+  }
+}

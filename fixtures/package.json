@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@guardian/source-foundations": "8.0.0",
+    "@guardian/core-web-vitals": "2.0.2"
+  },
+  "devDependencies": {
+    "@guardian/libs": "^12",
+    "@guardian/ab-react": "^2.0.1"
+  }
+}
