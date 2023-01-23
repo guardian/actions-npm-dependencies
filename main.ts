@@ -1,7 +1,7 @@
 import { parse_declared_dependencies } from "./parse_dependencies.ts";
 import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 import { colour } from "./colours.ts";
-import { find_mismatched_peer_dependencies } from "./find_mismatches.ts";
+import { count_unsatisfied_peer_dependencies } from "./find_mismatches.ts";
 
 const [package_file] = Deno.args;
 
@@ -30,14 +30,18 @@ if (dependencies.length === 0) {
 
 const dependencies_with_peers = await fetch_peer_dependencies(dependencies);
 
-const { length: number_of_mismatched_deps } = find_mismatched_peer_dependencies(
+const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
   dependencies_with_peers,
 );
 
 if (number_of_mismatched_deps === 0) {
   console.info("✅ Everything is fine with your dependencies");
 } else {
-  console.info("🚨 This shal");
+  console.info(
+    `🚨 There are ${
+      colour.file(String(number_of_mismatched_deps))
+    } unsatisfied peer dependencies`,
+  );
 }
 
 Deno.exit(number_of_mismatched_deps);

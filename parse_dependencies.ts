@@ -1,4 +1,4 @@
-import { object, record, string, coerce } from "./deps.ts";
+import { object, Range, record, string } from "./deps.ts";
 import { colour } from "./colours.ts";
 import { Dependency } from "./types.ts";
 
@@ -9,12 +9,11 @@ const { parse } = object({
 
 const parse_dependencies = (o: Record<string, string>): Dependency[] =>
   Object.entries(o).map(([name, version]) => {
-    const semver = coerce(version);
-    if (!semver) throw new Error(`Could not parse semver: ${version}`);
+    const range = new Range(version);
+    if (!range) throw new Error(`Could not parse semver: ${version}`);
     return {
       name,
-      version: semver,
-      peers: [],
+      range,
     };
   });
 
@@ -32,7 +31,7 @@ const find_duplicates = (deps: Dependency[]): string[] => {
 
 export const parse_declared_dependencies = (contents: string): Dependency[] => {
   const { dependencies = {}, devDependencies = {} } = parse(
-    JSON.parse(contents)
+    JSON.parse(contents),
   );
 
   const deps = [dependencies, devDependencies].map(parse_dependencies).flat();

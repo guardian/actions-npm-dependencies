@@ -1,46 +1,47 @@
 import { colour } from "./colours.ts";
-import { satisfies } from "./deps.ts";
-import { Dependency } from "./types.ts";
+import { Dependency, RegistryDependency } from "./types.ts";
 
-export const find_mismatched_peer_dependencies = (
-  dependencies: Dependency[],
-) => {
-  const peers = dependencies.flatMap(({ name, peers }) =>
-    peers.map((peer) => ({ ...peer, required_by: name }))
-  );
+interface Matching {
+  name: string;
+  peers?: never;
+}
 
-  const mismatched = peers.filter((peer_dependency) => {
-    const local_version = dependencies.find(
-      ({ name }) => name === peer_dependency.name,
-    );
-    if (!local_version) {
-      return !peer_dependency.optional;
-    }
-    return !satisfies(local_version.version, peer_dependency.range);
-  });
+interface Missing {
+  name: string;
+  peers: Dependency[];
+}
 
-  if (mismatched.length === 0) {
-    console.info(`✅ All ${colour.file("peerDependencies")} satisfied}`);
-  } else {
-    console.error(
-      `🚨 The following ${colour.file("peerDependencies")} are unsatisfied:`,
-    );
+export const count_unsatisfied_peer_dependencies = (
+  dependencies: RegistryDependency[],
+) =>
+  dependencies.map(({ name, peers }) => {
+    const { length: unsatisfied } = peers.filter((peer) => !peer.satisfied);
 
-    for (const { name, range, required_by } of mismatched) {
+    if (unsatisfied === 0) {
+      console.info(
+        `✅ All ${colour.file("peerDependencies")} satisfied for ${
+          colour.dependency(name)
+        }`,
+      );
+    } else {
       console.error(
-        `   - ${
+        `🚨 Not all ${colour.file("peerDependencies")} are satisfied for ${
+          colour.dependency(name)
+        }:`,
+      );
+    }
+
+    for (const { name, range, satisfied } of peers) {
+      console.error(
+        `   - ${satisfied ? "✅" : "🚨"} ${
           [
             colour.dependency(name),
             colour.subdued("@"),
             colour.version(range.raw),
-            " (from ",
-            colour.dependency(required_by),
-            " )",
           ].join("")
         }`,
       );
     }
-  }
 
-  return mismatched;
-};
+    return unsatisfied;
+  }).reduce((acc, curr) => acc + curr);

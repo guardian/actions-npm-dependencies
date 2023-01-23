@@ -1,13 +1,15 @@
-import { SemVer, Range } from "./deps.ts";
+import { Range, SemVer } from "./deps.ts";
 
 export interface Dependency {
   name: string;
-  version: SemVer;
+  range: Range;
+}
+
+export interface RegistryDependency extends Dependency {
+  versions: SemVer[];
   peers: PeerDependency[];
 }
 
-export interface PeerDependency {
-  name: string;
-  range: Range;
-  optional: boolean;
+export interface PeerDependency extends Dependency {
+  satisfied: boolean;
 }

@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows, SemVer } from "./deps.ts";
+import { assertEquals, assertThrows, Range } from "./deps.ts";
 import { parse_declared_dependencies } from "./parse_dependencies.ts";
 
 Deno.test("Handles valid package.json", () => {
@@ -18,23 +18,19 @@ Deno.test("Handles valid package.json", () => {
   assertEquals(parse_declared_dependencies(json), [
     {
       name: "one",
-      version: new SemVer("1.0.0"),
-      peers: [],
+      range: new Range("1.0.0"),
     },
     {
       name: "two",
-      version: new SemVer("1.1.0"),
-      peers: [],
+      range: new Range("~1.1.0"),
     },
     {
       name: "three",
-      version: new SemVer("1.1.1"),
-      peers: [],
+      range: new Range("^1.1.1"),
     },
     {
       name: "four",
-      version: new SemVer("0.0.1"),
-      peers: [],
+      range: new Range("0.0.1"),
     },
   ]);
 });
