@@ -1,6 +1,6 @@
 import { colour } from "./colours.ts";
 import {
-  literal,
+  boolean,
   minVersion,
   object,
   Range,
@@ -16,13 +16,14 @@ const { parseAsync: parse_peers } = object({
     version: string(),
     dependencies: record(string()).optional(),
     peerDependencies: record(string()).optional(),
-    peerDependenciesMeta: record(object({ optional: literal(true) }))
+    peerDependenciesMeta: record(object({ optional: boolean() }))
       .optional(),
   })),
 });
 
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
+  verbose = true,
 ): Promise<RegistryDependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
@@ -44,7 +45,7 @@ export const fetch_peer_dependencies = (
             );
           }
 
-          if (Object.keys(version.dependencies ?? {}).length > 0) {
+          if (verbose && Object.keys(version.dependencies ?? {}).length > 0) {
             console.warn(
               "🔍 Further dependencies not analysed for",
               colour.dependency(dependency.name),

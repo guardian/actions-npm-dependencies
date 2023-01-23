@@ -8,12 +8,10 @@ const { parse } = object({
 });
 
 const parse_dependencies = (o: Record<string, string>): Dependency[] =>
-  Object.entries(o).map(([name, version]) => {
-    const range = new Range(version);
-    if (!range) throw new Error(`Could not parse semver: ${version}`);
+  Object.entries(o).map(([name, range]) => {
     return {
       name,
-      range,
+      range: new Range(range),
     };
   });
 
@@ -33,6 +31,27 @@ export const parse_declared_dependencies = (contents: string): Dependency[] => {
   const { dependencies = {}, devDependencies = {} } = parse(
     JSON.parse(contents),
   );
+
+  for (
+    const [name, range] of Object.entries({
+      ...dependencies,
+      ...devDependencies,
+    })
+  ) {
+    try {
+      new Range(range);
+    } catch (error: unknown) {
+      if (error instanceof Error) console.error(error.message);
+      console.warn(
+        "🚨 Ignored peer dependency",
+        colour.dependency(name),
+        colour.subdued("@"),
+        colour.version(range),
+      );
+      delete dependencies[name];
+      delete devDependencies[name];
+    }
+  }
 
   const deps = [dependencies, devDependencies].map(parse_dependencies).flat();
 

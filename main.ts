@@ -3,7 +3,9 @@ import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 import { colour } from "./colours.ts";
 import { count_unsatisfied_peer_dependencies } from "./find_mismatches.ts";
 
-const [package_file] = Deno.args;
+const [package_file, quiet] = Deno.args;
+
+const verbose = quiet !== "--quiet";
 
 if (!package_file) {
   console.error("🚨 No package.json passed as argument");
@@ -15,7 +17,7 @@ const filename = Deno.cwd() + "/" + package_file;
 const package_content = await Deno.readTextFile(filename).catch(() => "");
 
 if (package_content) {
-  console.info(`✅ Found package.json file`);
+  if (verbose) console.info(`✅ Found package.json file`);
 } else {
   console.error("🚨 No package.json found at", colour.file(filename));
   Deno.exit(1);
@@ -24,18 +26,24 @@ if (package_content) {
 const dependencies = parse_declared_dependencies(package_content);
 
 if (dependencies.length === 0) {
-  console.info("✅ You have no dependencies and therefore no issues!");
+  if (verbose) {
+    console.info("✅ You have no dependencies and therefore no issues!");
+  }
   Deno.exit();
 }
 
-const dependencies_with_peers = await fetch_peer_dependencies(dependencies);
+const dependencies_with_peers = await fetch_peer_dependencies(
+  dependencies,
+  verbose,
+);
 
 const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
   dependencies_with_peers,
+  verbose,
 );
 
 if (number_of_mismatched_deps === 0) {
-  console.info("✅ Everything is fine with your dependencies");
+  if (verbose) console.info("✅ Everything is fine with your dependencies");
 } else {
   console.info(
     `🚨 There are ${
