@@ -10,26 +10,31 @@ export const count_unsatisfied_peer_dependencies = (
     .reduce((acc, curr) => acc + curr);
 
 export const format_dependencies = (
-  dependencies: RegistryDependency[],
+  registry_dependencies: RegistryDependency[],
   verbose = true,
 ): void => {
-  dependencies.map(({ name, range, dependencies, peers }) => {
-    console.info(
-      `├─ ${format(name, range)}`,
-    );
-
-    let count = dependencies.length;
-    for (const dependency of dependencies) {
-      const angle = peers.length === 0 && --count === 0 ? "╰" : "├";
-      console.warn(
-        `│  ${angle}─ ${colour.version("▲")} ${
-          format(dependency.name, dependency.range)
-        } – futher ${colour.file("dependencies")} not analysed`,
+  for (const { name, range, dependencies, peers } of registry_dependencies) {
+    const unsatisfied = peers.filter(({ satisfied }) => !satisfied);
+    if (verbose || unsatisfied.length > 0) {
+      console.info(
+        `├─ ${format(name, range)}`,
       );
     }
 
-    count = peers.length;
-    for (const { name, range, satisfied } of peers) {
+    let count = dependencies.length;
+    if (verbose) {
+      for (const dependency of dependencies) {
+        const angle = peers.length === 0 && --count === 0 ? "╰" : "├";
+        console.warn(
+          `│  ${angle}─ ${colour.version("▲")} ${
+            format(dependency.name, dependency.range)
+          } – futher ${colour.file("dependencies")} not analysed`,
+        );
+      }
+    }
+
+    count = verbose ? peers.length : unsatisfied.length;
+    for (const { name, range, satisfied } of verbose ? peers : unsatisfied) {
       const angle = --count === 0 ? "╰" : "├";
       if (satisfied) {
         if (verbose) {
@@ -39,9 +44,11 @@ export const format_dependencies = (
         }
       } else {
         console.error(
-          `│  ${angle}─ ${colour.invalid("✕")} ${format(name, range)}`,
+          `│  ${angle}─ ${colour.invalid("✕")} ${
+            format(name, range)
+          } – unsatisfied peer dependency`,
         );
       }
     }
-  });
+  }
 };

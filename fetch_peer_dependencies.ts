@@ -79,7 +79,17 @@ export const fetch_peer_dependencies = (
 
           return {
             ...dependency,
-            dependencies: Object.entries(version.dependencies ?? {}).map(
+            dependencies: Object.entries(version.dependencies ?? {}).filter(
+              ([name, range]) => {
+                try {
+                  new Range(range);
+                  return true;
+                } catch {
+                  console.warn("Invalid range:", `${name}@${range}`);
+                }
+                return false;
+              },
+            ).map(
               ([name, range]) => ({ name, range: new Range(range) }),
             ),
             peers,
