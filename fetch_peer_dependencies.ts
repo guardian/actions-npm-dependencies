@@ -1,5 +1,5 @@
 import { get } from "./cache.ts";
-import { colour } from "./colours.ts";
+import { format } from "./colours.ts";
 import {
   boolean,
   minVersion,
@@ -49,12 +49,9 @@ export const fetch_peer_dependencies = (
 
           if (verbose && Object.keys(version.dependencies ?? {}).length > 0) {
             console.warn(
-              "🔍 Further dependencies not analysed for",
-              [
-                colour.dependency(dependency.name),
-                colour.subdued("@"),
-                colour.version(version.version),
-              ].join(""),
+              `🔍 ${
+                format(dependency.name, dependency.range)
+              } – futher deps not analysed`,
             );
           }
 
