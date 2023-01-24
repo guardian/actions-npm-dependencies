@@ -16,9 +16,8 @@ export const format_dependencies = (
   for (const { name, range, dependencies, peers } of registry_dependencies) {
     const unsatisfied = peers.filter(({ satisfied }) => !satisfied);
     if (verbose || unsatisfied.length > 0) {
-      console.info(
-        `├─ ${format(name, range)}`,
-      );
+      console.info(`│`);
+      console.info(`├─ ${format(name, range)}`);
     }
 
     let count = dependencies.length;
@@ -44,9 +43,7 @@ export const format_dependencies = (
         }
       } else {
         console.error(
-          `│  ${angle}─ ${colour.invalid("✕")} ${
-            format(name, range)
-          } – unsatisfied peer dependency`,
+          `│  ${angle}─ ${colour.invalid("✕")} ${format(name, range)}`,
         );
       }
     }
