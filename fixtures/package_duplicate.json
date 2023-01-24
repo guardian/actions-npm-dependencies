@@ -1,4 +1,6 @@
 {
+  "name": "npm-dependencies-duplicate",
+  "version": "0.0.2",
   "dependencies": {
     "@guardian/source-foundations": "8.0.0",
     "@guardian/libs": "^12"

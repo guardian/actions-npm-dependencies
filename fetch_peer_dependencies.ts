@@ -73,6 +73,7 @@ export const fetch_peer_dependencies = (
                 name,
                 range: new Range(range),
                 satisfied,
+                local: local_version,
               };
             })
             : [];

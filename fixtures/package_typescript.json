@@ -1,4 +1,6 @@
 {
+  "name": "npm-dependencies-typescript",
+  "version": "0.0.1",
   "dependencies": {
     "@guardian/source-foundations": "8.0.0"
   },

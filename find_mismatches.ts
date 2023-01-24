@@ -33,7 +33,9 @@ export const format_dependencies = (
     }
 
     count = verbose ? peers.length : unsatisfied.length;
-    for (const { name, range, satisfied } of verbose ? peers : unsatisfied) {
+    for (
+      const { name, range, satisfied, local } of verbose ? peers : unsatisfied
+    ) {
       const angle = --count === 0 ? "╰" : "├";
       if (satisfied) {
         if (verbose) {
@@ -42,8 +44,14 @@ export const format_dependencies = (
           );
         }
       } else {
+        const reason = local
+          ? `locally specified to ${colour.version(local.raw)}`
+          : "locally missing";
+
         console.error(
-          `│  ${angle}─ ${colour.invalid("✕")} ${format(name, range)}`,
+          `│  ${angle}─ ${colour.invalid("✕")} ${
+            format(name, range)
+          } – ${reason}`,
         );
       }
     }

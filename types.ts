@@ -7,10 +7,11 @@ export interface Dependency {
 
 export interface RegistryDependency extends Dependency {
   version: SemVer;
-  dependencies: Dependency[]
+  dependencies: Dependency[];
   peers: PeerDependency[];
 }
 
 export interface PeerDependency extends Dependency {
   satisfied: boolean;
+  local?: Range;
 }
