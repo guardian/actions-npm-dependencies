@@ -4,4 +4,4 @@ export * from "https://esm.sh/semver@7.3.8";
 export {
   assertEquals,
   assertThrows,
-} from "https://deno.land/std@0.156.0/testing/asserts.ts";
+} from "https://deno.land/std@0.168.0/testing/asserts.ts";

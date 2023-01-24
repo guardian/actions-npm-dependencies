@@ -1,15 +1,5 @@
 import { colour } from "./colours.ts";
-import { Dependency, RegistryDependency } from "./types.ts";
-
-interface Matching {
-  name: string;
-  peers?: never;
-}
-
-interface Missing {
-  name: string;
-  peers: Dependency[];
-}
+import { RegistryDependency } from "./types.ts";
 
 export const count_unsatisfied_peer_dependencies = (
   dependencies: RegistryDependency[],

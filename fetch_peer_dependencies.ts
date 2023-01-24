@@ -1,3 +1,4 @@
+import { get } from "./cache.ts";
 import { colour } from "./colours.ts";
 import {
   boolean,
@@ -23,15 +24,16 @@ const { parseAsync: parse_peers } = object({
 
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
-  verbose = true,
+  { verbose = false, cache = false } = {},
 ): Promise<RegistryDependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
-      fetch(
+      get(
         new URL(
           encodeURIComponent(dependency.name),
           "https://registry.npmjs.org/",
         ),
+        cache,
       )
         .then((res) => res.json())
         .then(parse_peers)
@@ -48,9 +50,11 @@ export const fetch_peer_dependencies = (
           if (verbose && Object.keys(version.dependencies ?? {}).length > 0) {
             console.warn(
               "🔍 Further dependencies not analysed for",
-              colour.dependency(dependency.name),
-              colour.subdued("@"),
-              colour.version(version.version),
+              [
+                colour.dependency(dependency.name),
+                colour.subdued("@"),
+                colour.version(version.version),
+              ].join(""),
             );
           }
 
@@ -98,3 +102,21 @@ export const fetch_peer_dependencies = (
         })
     ),
   );
+
+Deno.bench("Fetch with cache", async () => {
+  await fetch_peer_dependencies([
+    {
+      name: "@guardian/core-web-vitals",
+      range: new Range("2.0.2"),
+    },
+  ], { cache: true });
+});
+
+Deno.bench("Fetch without cache", async () => {
+  await fetch_peer_dependencies([
+    {
+      name: "@guardian/core-web-vitals",
+      range: new Range("2.0.2"),
+    },
+  ], { cache: false });
+});

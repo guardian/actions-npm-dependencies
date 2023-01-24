@@ -2,10 +2,12 @@ import { parse_declared_dependencies } from "./parse_dependencies.ts";
 import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 import { colour } from "./colours.ts";
 import { count_unsatisfied_peer_dependencies } from "./find_mismatches.ts";
+import { parse } from "https://deno.land/std@0.168.0/flags/mod.ts";
 
-const [package_file, quiet] = Deno.args;
-
-const verbose = quiet !== "--quiet";
+const { _: [package_file], verbose, cache } = parse(Deno.args, {
+  boolean: ["verbose", "cache"],
+  default: { verbose: false, cache: true },
+});
 
 if (!package_file) {
   console.error("🚨 No package.json passed as argument");
@@ -34,7 +36,7 @@ if (dependencies.length === 0) {
 
 const dependencies_with_peers = await fetch_peer_dependencies(
   dependencies,
-  verbose,
+  { verbose, cache },
 );
 
 const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
