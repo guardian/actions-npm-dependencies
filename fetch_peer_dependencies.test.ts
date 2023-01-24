@@ -14,7 +14,8 @@ Deno.test("Can get peer dependencies", async () => {
     {
       name: "@guardian/core-web-vitals",
       range: new Range("2.0.2"),
-      versions: [new SemVer("2.0.2")],
+      version: new SemVer("2.0.2"),
+      dependencies: [],
       peers: [
         {
           name: "@guardian/libs",
@@ -50,7 +51,8 @@ Deno.test("Can get optional peer dependencies", async () => {
     {
       name: "@guardian/libs",
       range: new Range("12.0.0"),
-      versions: [new SemVer("12.0.0")],
+      version: new SemVer("12.0.0"),
+      dependencies: [],
       peers: [
         {
           name: "tslib",
@@ -78,7 +80,8 @@ Deno.test("Will fail on optional dependencies that are defined locally", async (
     {
       name: "@guardian/libs",
       range: new Range("12.0.0"),
-      versions: [new SemVer("12.0.0")],
+      version: new SemVer("12.0.0"),
+      dependencies: [],
       peers: [
         {
           name: "tslib",
@@ -95,13 +98,15 @@ Deno.test("Will fail on optional dependencies that are defined locally", async (
     {
       name: "tslib",
       range: new Range("2.4.1"),
-      versions: [new SemVer("2.4.1")],
+      version: new SemVer("2.4.1"),
+      dependencies: [],
       peers: [],
     },
     {
       name: "typescript",
       range: new Range("4.2.2"),
-      versions: [new SemVer("4.2.2")],
+      version: new SemVer("4.2.2"),
+      dependencies: [],
       peers: [],
     },
   ]);

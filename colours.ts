@@ -2,6 +2,8 @@ import {
   blue,
   cyan,
   gray,
+  green,
+  red,
   yellow,
 } from "https://deno.land/std@0.171.0/fmt/colors.ts";
 
@@ -12,6 +14,8 @@ export const colour = {
   file: cyan,
   subdued: gray,
   version: yellow,
+  valid: green,
+  invalid: red,
 };
 
 export const format = (name: string, range: Range) =>

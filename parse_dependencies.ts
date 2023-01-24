@@ -27,9 +27,21 @@ const find_duplicates = (deps: Dependency[]): string[] => {
   return [...duplicates];
 };
 
-export const parse_declared_dependencies = (contents: string): Dependency[] => {
+const package_parser = object({
+  name: string(),
+  version: string(),
+});
+
+export const parse_package_info = (contents: unknown): Dependency => {
+  const { name, version } = package_parser.parse(contents);
+  return { name, range: new Range(version) };
+};
+
+export const parse_declared_dependencies = (
+  contents: unknown,
+): Dependency[] => {
   const { dependencies = {}, devDependencies = {} } = parse(
-    JSON.parse(contents),
+    contents,
   );
 
   for (

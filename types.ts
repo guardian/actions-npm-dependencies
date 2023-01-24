@@ -6,7 +6,8 @@ export interface Dependency {
 }
 
 export interface RegistryDependency extends Dependency {
-  versions: SemVer[];
+  version: SemVer;
+  dependencies: Dependency[]
   peers: PeerDependency[];
 }
 

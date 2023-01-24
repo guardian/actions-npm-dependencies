@@ -8,7 +8,8 @@ Deno.test("Works when all dependencies are matched", () => {
       {
         name: "one",
         range: new Range("1.0.0"),
-        versions: [new SemVer("1.0.0")],
+        version: new SemVer("1.0.0"),
+        dependencies: [],
         peers: [
           {
             name: "two",
@@ -25,7 +26,8 @@ Deno.test("Works when all dependencies are matched", () => {
       {
         name: "two",
         range: new Range("2.0.2"),
-        versions: [new SemVer("2.0.2")],
+        version: new SemVer("2.0.2"),
+        dependencies: [],
         peers: [
           { name: "four", satisfied: true, range: new Range("^4") },
         ],
@@ -41,7 +43,8 @@ Deno.test("Fails on invalid range", () => {
       {
         name: "one",
         range: new Range("1.0.0"),
-        versions: [new SemVer("1.0.0")],
+        version: new SemVer("1.0.0"),
+        dependencies: [],
         peers: [
           {
             name: "two",
@@ -53,7 +56,8 @@ Deno.test("Fails on invalid range", () => {
       {
         name: "two",
         range: new Range("2.0.2"),
-        versions: [new SemVer("2.0.2")],
+        version: new SemVer("2.0.2"),
+        dependencies: [],
         peers: [],
       },
     ]),
