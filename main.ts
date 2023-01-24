@@ -6,10 +6,9 @@ import { parse } from "https://deno.land/std@0.168.0/flags/mod.ts";
 
 const { _: [package_file], verbose, cache } = parse(Deno.args, {
   boolean: ["verbose", "cache"],
-  default: { verbose: false, cache: true },
 });
 
-if (!package_file) {
+if (typeof package_file !== "string") {
   console.error("🚨 No package.json passed as argument");
   Deno.exit(1);
 }
