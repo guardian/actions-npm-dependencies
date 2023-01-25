@@ -7,7 +7,7 @@ Validate your NPM dependencies without installing Node (WIP)
 ```
 deno run \
     --allow-net=unpkg.com --allow-read=. \
-    https://deno.land/x/package_health@latest/src/main.ts \
+    https://deno.land/x/package_health/src/main.ts \
     ./package.json  \
     --cache
 ```
