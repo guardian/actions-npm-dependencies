@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows, Range } from "./deps.ts";
+import { assertEquals, Range } from "./deps.ts";
 import {
   find_duplicates,
   parse_declared_dependencies,
