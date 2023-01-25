@@ -77,10 +77,3 @@ jobs:
             src/main.ts \
             fixtures/package.json  \
             --verbose --cache --errors=7
-
-  final:
-    needs: [health, working_package, failing_peer]
-    runs-on: ubuntu-latest
-    steps:
-      - name: "All good"
-        run: exit 0
