@@ -1,0 +1,12 @@
+{
+  "name": "npm-dependencies-typescript",
+  "version": "0.0.1",
+  "dependencies": {
+    "@guardian/source-foundations": "8.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.2.4",
+    "@guardian/libs": "^12",
+    "@guardian/ab-react": "^2.0.1"
+  }
+}
