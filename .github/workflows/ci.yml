@@ -18,7 +18,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno dependencies 
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.DENO_DIR }}
           key: ${{ hashFiles('lock.json') }}
@@ -42,7 +42,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno dependencies 
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.DENO_DIR }}
           key: ${{ hashFiles('lock.json') }}
@@ -65,7 +65,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno dependencies 
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.DENO_DIR }}
           key: ${{ hashFiles('lock.json') }}
