@@ -9,6 +9,7 @@ import {
   format_dependencies,
 } from "./find_mismatches.ts";
 import { parse } from "https://deno.land/std@0.168.0/flags/mod.ts";
+import { filter_types } from "./check_types.ts";
 
 const { _: [package_file], verbose, cache } = parse(Deno.args, {
   boolean: ["verbose", "cache"],
@@ -32,15 +33,34 @@ if (!package_content) {
   Deno.exit(1);
 }
 
-const { name, range } = parse_package_info(package_content);
+const { name, range, dependencies, devDependencies } = parse_package_info(
+  package_content,
+);
 
 console.info(`${format(name, range)}`);
 
-const dependencies_from_package = parse_declared_dependencies(package_content);
+const types_in_direct_dependencies = filter_types(Object.keys(dependencies));
+
+if (types_in_direct_dependencies.length > 0) {
+  console.error(
+    `├─ ${colour.invalid("✕")} ${
+      colour.dependency("@types/*")
+    } should only be present in devDependencies`,
+  );
+}
+
+const dependencies_tuple: [name: string, range: string][] = [
+  dependencies,
+  devDependencies,
+].map((_) => Object.entries(_)).flat();
+
+const dependencies_from_package = parse_declared_dependencies(
+  dependencies_tuple,
+);
 
 if (dependencies_from_package.length === 0) {
   if (verbose) {
-    console.info("✅ You have no dependencies and therefore no issues!");
+    console.info("╰ You have no dependencies and therefore no issues!");
   }
   Deno.exit();
 }
@@ -59,18 +79,27 @@ const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
   dependencies_from_registry,
 );
 
-if (number_of_mismatched_deps === 0) {
-  if (verbose) console.info("✅ Dependencies are in good shape");
-} else if (number_of_mismatched_deps === 1) {
+const problems = number_of_mismatched_deps +
+  types_in_direct_dependencies.length;
+
+console.info("│");
+
+if (problems === 0) {
+  if (verbose) {
+    console.info(`╰─ ${colour.valid("○")} Dependencies are in good shape`);
+  }
+} else if (problems === 1) {
   console.error(
-    `🚨 There is ${colour.file("1")} dependencies problem`,
+    `╰─ ${colour.invalid("✕")} There is ${
+      colour.invalid("1")
+    } dependencies problem`,
   );
 } else {
   console.error(
-    `🚨 There are ${
-      colour.file(String(number_of_mismatched_deps))
+    `╰─ ${colour.invalid("✕")} There are ${
+      colour.invalid(String(problems))
     } dependencies problems`,
   );
 }
 
-Deno.exit(number_of_mismatched_deps);
+Deno.exit(problems);

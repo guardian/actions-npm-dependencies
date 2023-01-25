@@ -1,6 +1,7 @@
 import { object, Range, record, string } from "./deps.ts";
 import { colour } from "./colours.ts";
 import { Dependency, UnrefinedDependency } from "./types.ts";
+import { isDefined } from "./utils.ts";
 
 const find_duplicates = (dependencies: Dependency[]): string[] => {
   const seen = new Set<string>();
@@ -28,8 +29,6 @@ export const parse_package_info = (contents: unknown): UnrefinedDependency => {
     );
   return { name, range: new Range(version), dependencies, devDependencies };
 };
-
-const isDefined = <T>(_: T): _ is NonNullable<T> => typeof _ !== "undefined";
 
 export const parse_declared_dependencies = (
   dependencies: [name: string, range: string][],
