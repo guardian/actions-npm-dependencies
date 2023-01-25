@@ -1,12 +1,10 @@
-export const get = async (url: URL, cache?: Cache) => {
-  if (!cache) {
-    return fetch(url);
-  }
+export const get = async ({ href }: URL, cache?: Cache) => {
+  if (!cache) return fetch(href);
 
-  const found = await cache.match(url);
+  const found = await cache.match(href);
   if (found) return found;
 
-  const response = await fetch(url);
-  cache.put(url, response.clone());
+  const response = await fetch(href);
+  void cache.put(href, response.clone());
   return response;
 };
