@@ -2,6 +2,20 @@
 
 Validate your NPM dependencies without installing Node (WIP)
 
+## How to get a health report for your `package.json`?
+
+```
+deno run \
+    --allow-net=unpkg.com --allow-read=. \
+    https://deno.land/x/package_health@latest/src/main.ts \
+    ./package.json  \
+    --cache
+```
+
+> **Note**
+> - The `--cache` flag should help with speedups
+> - The `--verbose` flag is very verbose
+
 ## Todo
 
 - [x] Make it functional and composable
