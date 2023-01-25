@@ -1,17 +1,17 @@
 import {
-  blue,
   cyan,
   gray,
   green,
   red,
+  underline,
   yellow,
 } from "https://deno.land/std@0.171.0/fmt/colors.ts";
 
 import { Range } from "./deps.ts";
 
 export const colour = {
-  dependency: blue,
-  file: cyan,
+  dependency: cyan,
+  file: underline,
   subdued: gray,
   version: yellow,
   valid: green,
