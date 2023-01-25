@@ -79,7 +79,7 @@ if (duplicates.length > 0) {
 
 const dependencies_from_registry = await fetch_peer_dependencies(
   dependencies_from_package,
-  { cache },
+  cache ? await caches.open("npm-registry-cache") : undefined,
 );
 
 format_dependencies(

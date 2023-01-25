@@ -1,6 +1,8 @@
 import { Range } from "./deps.ts";
 import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 
+const cache = await caches.open("bench");
+
 Deno.bench("Fetch with cache", async () => {
   await fetch_peer_dependencies(
     [
@@ -9,7 +11,7 @@ Deno.bench("Fetch with cache", async () => {
         range: new Range("2.0.2"),
       },
     ],
-    { cache: true },
+    undefined,
   );
 });
 
@@ -21,6 +23,18 @@ Deno.bench("Fetch without cache", async () => {
         range: new Range("2.0.2"),
       },
     ],
-    { cache: false },
+    cache,
+  );
+});
+
+Deno.bench("Fetch large dependency with cache", async () => {
+  await fetch_peer_dependencies(
+    [
+      {
+        name: "typescript",
+        range: new Range("4.9.3"),
+      },
+    ],
+    cache,
   );
 });

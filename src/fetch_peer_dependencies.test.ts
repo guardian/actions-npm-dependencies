@@ -8,7 +8,7 @@ Deno.test("Can get peer dependencies", async () => {
       name: "@guardian/core-web-vitals",
       range: new Range("2.0.2"),
     },
-  ]);
+  ], await caches.open("test"));
 
   assertEquals(with_peer_deps, [
     {
@@ -49,7 +49,7 @@ Deno.test("Can get peer dependencies", async () => {
 Deno.test("Can get optional peer dependencies", async () => {
   const peer_deps = await fetch_peer_dependencies([
     { name: "@guardian/libs", range: new Range("12.0.0") },
-  ]);
+  ], await caches.open("test"));
 
   assertEquals(peer_deps, [
     {
@@ -80,7 +80,7 @@ Deno.test("Will fail on optional dependencies that are defined locally", async (
     { name: "@guardian/libs", range: new Range("12.0.0") },
     { name: "tslib", range: new Range("2.4.1") },
     { name: "typescript", range: new Range("4.2.2") },
-  ]);
+  ], await caches.open("test"));
 
   assertEquals(peer_deps, [
     {

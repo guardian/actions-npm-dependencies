@@ -1,5 +1,8 @@
 import { assertEquals, assertThrows, Range } from "./deps.ts";
-import { parse_declared_dependencies } from "./parse_dependencies.ts";
+import {
+  find_duplicates,
+  parse_declared_dependencies,
+} from "./parse_dependencies.ts";
 
 Deno.test("Handles valid package.json", () => {
   const tuples = [
@@ -30,11 +33,12 @@ Deno.test("Handles valid package.json", () => {
 });
 
 Deno.test("Warns on duplicate dependencies", () => {
-  const tuples = [
+  const dependencies = parse_declared_dependencies([
     ["one", "1.0.1"],
     ["two", "2.0.1"],
     ["two", "2.0.2"],
-  ] satisfies [string, string][];
+  ]);
+  const duplicates = find_duplicates(dependencies);
 
-  assertThrows(() => parse_declared_dependencies(tuples));
+  assertEquals(duplicates, ["two"]);
 });

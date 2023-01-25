@@ -1,10 +1,5 @@
-const name = "NPM registry";
-
-const cache = await caches.open(name);
-
-export const get = async (url: URL, use_cache: boolean) => {
-  if (!use_cache) {
-    cache.delete(url);
+export const get = async (url: URL, cache?: Cache) => {
+  if (!cache) {
     return fetch(url);
   }
 

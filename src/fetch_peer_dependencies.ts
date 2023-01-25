@@ -25,7 +25,7 @@ const { parseAsync: parse_peers } = object({
 
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
-  { cache = false } = {},
+  cache?: Cache,
 ): Promise<RegistryDependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
