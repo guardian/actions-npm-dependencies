@@ -3,7 +3,7 @@ import { colour } from "./colours.ts";
 import { Dependency, UnrefinedDependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 
-const find_duplicates = (dependencies: Dependency[]): string[] => {
+export const find_duplicates = (dependencies: Dependency[]): string[] => {
   const seen = new Set<string>();
   const duplicates = new Set<string>();
 
@@ -32,8 +32,8 @@ export const parse_package_info = (contents: unknown): UnrefinedDependency => {
 
 export const parse_declared_dependencies = (
   dependencies: [name: string, range: string][],
-): Dependency[] => {
-  const deps = dependencies.map(([name, range]) => {
+): Dependency[] =>
+  dependencies.map(([name, range]) => {
     try {
       return { name, range: new Range(range) };
     } catch (error: unknown) {
@@ -47,17 +47,3 @@ export const parse_declared_dependencies = (
     }
     return undefined;
   }).filter(isDefined).flat();
-
-  const duplicates = find_duplicates(deps);
-
-  if (duplicates.length > 0) {
-    console.warn("🚨 Duplicate dependencies found:");
-    for (const duplicate of duplicates) {
-      console.warn(`   - ${colour.dependency(duplicate)}`);
-    }
-
-    throw new Error("Duplicates found");
-  }
-
-  return deps;
-};

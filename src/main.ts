@@ -1,4 +1,5 @@
 import {
+  find_duplicates,
   parse_declared_dependencies,
   parse_package_info,
 } from "./parse_dependencies.ts";
@@ -67,6 +68,15 @@ if (dependencies_from_package.length === 0) {
   Deno.exit();
 }
 
+const duplicates = find_duplicates(dependencies_from_package);
+
+if (duplicates.length > 0) {
+  console.error(`│  Duplicate dependencies found!`);
+  for (const name of duplicates) {
+    console.error(`│  ╰─ ${colour.invalid("✕")} ${colour.dependency(name)}`);
+  }
+}
+
 const dependencies_from_registry = await fetch_peer_dependencies(
   dependencies_from_package,
   { cache },
@@ -82,7 +92,7 @@ const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
 );
 
 const problems = number_of_mismatched_deps +
-  types_in_direct_dependencies.length;
+  types_in_direct_dependencies.length + duplicates.length;
 
 console.info("│");
 

@@ -77,3 +77,26 @@ jobs:
             src/main.ts \
             fixtures/package.json  \
             --verbose --cache --errors=7
+
+  failing_duplicates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Cache Deno dependencies 
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: ${{ hashFiles('lock.json') }}
+
+      - run: |
+          deno run \
+            --allow-net=registry.npmjs.org \
+            --allow-read=. \
+            src/main.ts \
+            fixtures/package_duplicate.json  \
+            --verbose --cache --errors=3
