@@ -3,7 +3,7 @@ import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 
 const cache = await caches.open("bench");
 
-Deno.bench("Fetch with cache", async () => {
+Deno.bench("Fetch without cache", async () => {
   await fetch_peer_dependencies(
     [
       {
@@ -15,7 +15,7 @@ Deno.bench("Fetch with cache", async () => {
   );
 });
 
-Deno.bench("Fetch without cache", async () => {
+Deno.bench("Fetch with cache", async () => {
   await fetch_peer_dependencies(
     [
       {

@@ -1,5 +1,4 @@
 import { get } from "./cache.ts";
-import { format } from "./colours.ts";
 import {
   boolean,
   minVersion,
@@ -12,15 +11,11 @@ import {
 } from "./deps.ts";
 import type { Dependency, RegistryDependency } from "./types.ts";
 
-const { parseAsync: parse_peers } = object({
-  versions: record(
-    object({
-      version: string(),
-      dependencies: record(string()).optional(),
-      peerDependencies: record(string()).optional(),
-      peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
-    }),
-  ),
+const { parse } = object({
+  version: string(),
+  dependencies: record(string()).optional(),
+  peerDependencies: record(string()).optional(),
+  peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
 });
 
 export const fetch_peer_dependencies = (
@@ -31,26 +26,16 @@ export const fetch_peer_dependencies = (
     dependencies.map((dependency) =>
       get(
         new URL(
-          encodeURIComponent(dependency.name),
-          "https://registry.npmjs.org/",
+          `${dependency.name}@${minVersion(dependency.range)}/package.json`,
+          "https://unpkg.com/",
         ),
         cache,
       )
-        .then((res) => res.json())
-        .then(parse_peers)
+        .then((res) => res.json() as unknown)
+        .then((json) => parse(json))
         .then((registry) => {
-          const version = Object.values(registry.versions).find(({ version }) =>
-            satisfies(version, dependency.range)
-          );
-
-          if (!version) {
-            throw new Error(
-              `Could not find ${format(dependency.name, dependency.range)}`,
-            );
-          }
-
-          const peers = version.peerDependencies
-            ? Object.entries(version.peerDependencies).map(([name, range]) => {
+          const peers = Object.entries(registry.peerDependencies ?? {}).map(
+            ([name, range]) => {
               const local_version = dependencies.find(
                 (dependency) => dependency.name === name,
               )?.range;
@@ -62,7 +47,7 @@ export const fetch_peer_dependencies = (
                 ? satisfies(local_min_version, range)
                 : false;
 
-              const is_optional = !!version.peerDependenciesMeta?.[name]
+              const is_optional = !!registry.peerDependenciesMeta?.[name]
                 ?.optional;
 
               const satisfied = local_version
@@ -75,12 +60,12 @@ export const fetch_peer_dependencies = (
                 satisfied,
                 local: local_version,
               };
-            })
-            : [];
+            },
+          );
 
           return {
             ...dependency,
-            dependencies: Object.entries(version.dependencies ?? {}).filter(
+            dependencies: Object.entries(registry.dependencies ?? {}).filter(
               ([name, range]) => {
                 try {
                   new Range(range);
@@ -94,7 +79,7 @@ export const fetch_peer_dependencies = (
               ([name, range]) => ({ name, range: new Range(range) }),
             ),
             peers,
-            version: new SemVer(version.version),
+            version: new SemVer(registry.version),
           };
         })
         .catch((error) => {
