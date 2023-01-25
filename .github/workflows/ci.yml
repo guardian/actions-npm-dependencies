@@ -5,7 +5,7 @@ on:
 
 
 env:
-  DENO_DIR: my_cache_directory
+  DENO_DIR: ./cache
 
 jobs:
   health:
@@ -24,13 +24,13 @@ jobs:
           key: ${{ hashFiles('lock.json') }}
       
       - name: Format
-        run: deno fmt --check
+        run: deno fmt src --check
         
       - name: Lint
-        run: deno lint
+        run: deno lint src
 
       - name: Test
-        run: deno test --allow-net=registry.npmjs.org
+        run: deno test src --allow-net=registry.npmjs.org
           
   working_package:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
           deno run \
             --allow-net=registry.npmjs.org \
             --allow-read=. \
-            ./main.ts \
+            src/main.ts \
             fixtures/package_valid.json  \
             --verbose --cache
   
@@ -74,7 +74,7 @@ jobs:
           deno run \
             --allow-net=registry.npmjs.org \
             --allow-read=. \
-            ./main.ts \
+            src/main.ts \
             fixtures/package.json  \
             --verbose --cache
 
