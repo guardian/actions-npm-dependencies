@@ -1,25 +1,12 @@
 import { object, Range, record, string } from "./deps.ts";
 import { colour } from "./colours.ts";
-import { Dependency } from "./types.ts";
+import { Dependency, UnrefinedDependency } from "./types.ts";
 
-const { parse } = object({
-  dependencies: record(string()).optional(),
-  devDependencies: record(string()).optional(),
-});
-
-const parse_dependencies = (o: Record<string, string>): Dependency[] =>
-  Object.entries(o).map(([name, range]) => {
-    return {
-      name,
-      range: new Range(range),
-    };
-  });
-
-const find_duplicates = (deps: Dependency[]): string[] => {
+const find_duplicates = (dependencies: Dependency[]): string[] => {
   const seen = new Set<string>();
   const duplicates = new Set<string>();
 
-  for (const { name } of deps) {
+  for (const { name } of dependencies) {
     if (seen.has(name)) duplicates.add(name);
     seen.add(name);
   }
@@ -30,28 +17,26 @@ const find_duplicates = (deps: Dependency[]): string[] => {
 const package_parser = object({
   name: string(),
   version: string(),
+  dependencies: record(string()).optional(),
+  devDependencies: record(string()).optional(),
 });
 
-export const parse_package_info = (contents: unknown): Dependency => {
-  const { name, version } = package_parser.parse(contents);
-  return { name, range: new Range(version) };
+export const parse_package_info = (contents: unknown): UnrefinedDependency => {
+  const { name, version, dependencies = {}, devDependencies = {} } =
+    package_parser.parse(
+      contents,
+    );
+  return { name, range: new Range(version), dependencies, devDependencies };
 };
 
-export const parse_declared_dependencies = (
-  contents: unknown,
-): Dependency[] => {
-  const { dependencies = {}, devDependencies = {} } = parse(
-    contents,
-  );
+const isDefined = <T>(_: T): _ is NonNullable<T> => typeof _ !== "undefined";
 
-  for (
-    const [name, range] of Object.entries({
-      ...dependencies,
-      ...devDependencies,
-    })
-  ) {
+export const parse_declared_dependencies = (
+  dependencies: [name: string, range: string][],
+): Dependency[] => {
+  const deps = dependencies.map(([name, range]) => {
     try {
-      new Range(range);
+      return { name, range: new Range(range) };
     } catch (error: unknown) {
       if (error instanceof Error) console.error(error.message);
       console.warn(
@@ -60,12 +45,9 @@ export const parse_declared_dependencies = (
         colour.subdued("@"),
         colour.version(range),
       );
-      delete dependencies[name];
-      delete devDependencies[name];
     }
-  }
-
-  const deps = [dependencies, devDependencies].map(parse_dependencies).flat();
+    return undefined;
+  }).filter(isDefined).flat();
 
   const duplicates = find_duplicates(deps);
 

@@ -5,6 +5,11 @@ export interface Dependency {
   range: Range;
 }
 
+export interface UnrefinedDependency extends Dependency {
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+}
+
 export interface RegistryDependency extends Dependency {
   version: SemVer;
   dependencies: Dependency[];
