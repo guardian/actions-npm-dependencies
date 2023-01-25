@@ -11,8 +11,10 @@ import {
 import { parse } from "https://deno.land/std@0.168.0/flags/mod.ts";
 import { filter_types } from "./check_types.ts";
 
-const { _: [package_file], verbose, cache } = parse(Deno.args, {
+const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
   boolean: ["verbose", "cache"],
+  string: ["errors"],
+  default: { errors: "0" },
 });
 
 if (typeof package_file !== "string") {
@@ -100,6 +102,11 @@ if (problems === 0) {
       colour.invalid(String(problems))
     } dependencies problems`,
   );
+}
+if (errors === problems.toString()) {
+  // Pass if the number of problems matched the --errors flag
+  console.info(`\nAll ${errors} errors found – this is a success!`);
+  Deno.exit();
 }
 
 Deno.exit(problems);

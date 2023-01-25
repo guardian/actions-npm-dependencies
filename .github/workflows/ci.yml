@@ -76,15 +76,7 @@ jobs:
             --allow-read=. \
             src/main.ts \
             fixtures/package.json  \
-            --verbose --cache
-
-      - name: The job has failed, which is expected
-        if: ${{ failure() }}
-        run: exit 0
-
-      - name: The job has succeeded, which is wrong
-        if: ${{ success() }}
-        run: exit 1
+            --verbose --cache --errors=7
 
   final:
     needs: [health, working_package, failing_peer]
