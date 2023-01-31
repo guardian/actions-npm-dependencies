@@ -37,12 +37,11 @@ export const parse_declared_dependencies = (
     try {
       return { name, range: new Range(range) };
     } catch (error: unknown) {
-      if (error instanceof Error) console.error(error.message);
+      const reason = error instanceof Error ? error.message : "unknown";
       console.warn(
-        "🚨 Ignored peer dependency",
+        `╟─ ${colour.version("△")}`,
         colour.dependency(name),
-        colour.subdued("@"),
-        colour.version(range),
+        `(${reason})`,
       );
     }
     return undefined;
