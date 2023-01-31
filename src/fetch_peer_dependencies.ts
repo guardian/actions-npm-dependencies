@@ -10,7 +10,11 @@ import {
   SemVer,
   string,
 } from "./deps.ts";
-import type { Dependency, RegistryDependency } from "./types.ts";
+import type {
+  Dependency,
+  RegistryDependency,
+  UnrefinedDependency,
+} from "./types.ts";
 
 const { parse } = object({
   version: string(),
@@ -21,6 +25,7 @@ const { parse } = object({
 
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
+  known_issues: UnrefinedDependency["known_issues"],
   cache?: Cache,
 ): Promise<RegistryDependency[]> =>
   Promise.all(
@@ -41,11 +46,19 @@ export const fetch_peer_dependencies = (
                 (dependency) => dependency.name === name,
               )?.range;
 
+              const known_issue =
+                known_issues[`${dependency.name}@${dependency.range.raw}`]
+                  ?.[name];
+
+              const comparative_range = known_issue
+                ? range.replace(...known_issue)
+                : range;
+
               const local_min_version = local_version
                 ? minVersion(local_version)
                 : null;
               const local_version_matches = local_min_version
-                ? satisfies(local_min_version, range)
+                ? satisfies(local_min_version, comparative_range)
                 : false;
 
               const is_optional = !!registry.peerDependenciesMeta?.[name]

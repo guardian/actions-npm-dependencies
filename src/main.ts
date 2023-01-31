@@ -36,9 +36,10 @@ if (!package_content) {
   Deno.exit(1);
 }
 
-const { name, range, dependencies, devDependencies } = parse_package_info(
-  package_content,
-);
+const { name, range, dependencies, devDependencies, known_issues } =
+  parse_package_info(
+    package_content,
+  );
 
 console.info(
   `╔═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╗`,
@@ -85,6 +86,7 @@ if (duplicates.length > 0) {
 
 const dependencies_from_registry = await fetch_peer_dependencies(
   dependencies_from_package,
+  known_issues,
   cache ? await caches.open("npm-registry-cache") : undefined,
 );
 
@@ -119,6 +121,26 @@ if (problems === 0) {
       colour.invalid(String(problems))
     } dependencies problems`,
   );
+}
+
+if (known_issues) {
+  console.info("");
+  console.info(
+    `${colour.subdued("□")} There are ${
+      Object.keys(known_issues).length
+    } known issues:`,
+  );
+  for (const [name, issues] of Object.entries(known_issues)) {
+    console.info(`${colour.dependency(name)}`);
+    for (const [dependency, [from, to]] of Object.entries(issues)) {
+      console.info(
+        `${colour.subdued("□")} Substituted ${colour.dependency(dependency)}@${
+          colour.version(to)
+        }`,
+        `(specified @${colour.version(from)})`,
+      );
+    }
+  }
 }
 
 console.info("────────────────────────────────────");
