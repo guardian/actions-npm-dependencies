@@ -23,10 +23,14 @@ const { parse } = object({
   peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
 });
 
+interface Options {
+  known_issues?: UnrefinedDependency["known_issues"];
+  cache?: Cache;
+}
+
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
-  known_issues: UnrefinedDependency["known_issues"],
-  cache?: Cache,
+  { known_issues, cache }: Options = {},
 ): Promise<RegistryDependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
@@ -46,9 +50,9 @@ export const fetch_peer_dependencies = (
                 (dependency) => dependency.name === name,
               )?.range;
 
-              const known_issue =
-                known_issues[`${dependency.name}@${dependency.range.raw}`]
-                  ?.[name];
+              const known_issue = known_issues
+                ?.[`${dependency.name}@${dependency.range.raw}`]
+                ?.[name];
 
               const comparative_range = known_issue
                 ? range.replace(...known_issue)
