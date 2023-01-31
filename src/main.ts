@@ -40,13 +40,19 @@ const { name, range, dependencies, devDependencies } = parse_package_info(
   package_content,
 );
 
-console.info(`${format(name, range)}`);
+console.info(
+  `╔═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╗`,
+);
+console.info(`╫ ${format(name, range)} ╫`);
+console.info(
+  `╠═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╝`,
+);
 
 const types_in_direct_dependencies = filter_types(Object.keys(dependencies));
 
 if (types_in_direct_dependencies.length > 0) {
   console.error(
-    `├─ ${colour.invalid("✕")} ${
+    `╟─ ${colour.invalid("✕")} ${
       colour.dependency("@types/*")
     } should only be present in devDependencies`,
   );
@@ -71,9 +77,9 @@ if (dependencies_from_package.length === 0) {
 const duplicates = find_duplicates(dependencies_from_package);
 
 if (duplicates.length > 0) {
-  console.error(`│  Duplicate dependencies found!`);
+  console.error(`╠╤ Duplicate dependencies found!`);
   for (const name of duplicates) {
-    console.error(`│  ╰─ ${colour.invalid("✕")} ${colour.dependency(name)}`);
+    console.error(`║╰─ ${colour.invalid("✕")} ${colour.dependency(name)}`);
   }
 }
 
@@ -94,26 +100,30 @@ const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
 const problems = number_of_mismatched_deps +
   types_in_direct_dependencies.length + duplicates.length;
 
-console.info("│");
+console.info("║");
+console.info("╙───────────────────────────────────");
 
 if (problems === 0) {
   if (verbose) {
-    console.info(`╰─ ${colour.valid("○")} Dependencies are in good shape`);
+    console.info(`${colour.valid("○")} Dependencies are in good shape`);
   }
 } else if (problems === 1) {
   console.error(
-    `╰─ ${colour.invalid("✕")} There is ${
+    `${colour.invalid("✕")} There is ${
       colour.invalid("1")
     } dependencies problem`,
   );
 } else {
   console.error(
-    `╰─ ${colour.invalid("✕")} There are ${
+    `${colour.invalid("✕")} There are ${
       colour.invalid(String(problems))
     } dependencies problems`,
   );
 }
-if (errors === problems.toString()) {
+
+console.info("────────────────────────────────────");
+
+if (errors !== "0" && errors === problems.toString()) {
   // Pass if the number of problems matched the --errors flag
   console.info(`\nAll ${errors} errors found – this is a success!`);
   Deno.exit();

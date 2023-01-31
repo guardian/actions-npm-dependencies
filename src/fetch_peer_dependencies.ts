@@ -1,4 +1,5 @@
 import { get } from "./cache.ts";
+import { colour } from "./colours.ts";
 import {
   boolean,
   minVersion,
@@ -70,8 +71,15 @@ export const fetch_peer_dependencies = (
                 try {
                   new Range(range);
                   return true;
-                } catch {
-                  console.warn("Invalid range:", `${name}@${range}`);
+                } catch (error) {
+                  const reason = error instanceof Error
+                    ? error.message
+                    : "unknown";
+                  console.warn(
+                    `╟─ ${colour.version("△")} ${
+                      colour.dependency(name)
+                    } (${reason})`,
+                  );
                 }
                 return false;
               },
