@@ -1,4 +1,4 @@
-import { object, Range, record, string } from "./deps.ts";
+import { object, Range, record, string, tuple } from "./deps.ts";
 import { colour } from "./colours.ts";
 import { Dependency, UnrefinedDependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
@@ -20,14 +20,26 @@ const package_parser = object({
   version: string(),
   dependencies: record(string()).optional(),
   devDependencies: record(string()).optional(),
+  known_issues: record(record(tuple([string(), string()]))).optional(),
 });
 
 export const parse_package_info = (contents: unknown): UnrefinedDependency => {
-  const { name, version, dependencies = {}, devDependencies = {} } =
-    package_parser.parse(
-      contents,
-    );
-  return { name, range: new Range(version), dependencies, devDependencies };
+  const {
+    name,
+    version,
+    dependencies = {},
+    devDependencies = {},
+    known_issues = {},
+  } = package_parser.parse(
+    contents,
+  );
+  return {
+    name,
+    range: new Range(version),
+    dependencies,
+    devDependencies,
+    known_issues,
+  };
 };
 
 export const parse_declared_dependencies = (

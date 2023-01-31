@@ -8,6 +8,7 @@ export interface Dependency {
 export interface UnrefinedDependency extends Dependency {
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
+  known_issues: Record<string, Record<string, [from: string, to: string]>>;
 }
 
 export interface RegistryDependency extends Dependency {
