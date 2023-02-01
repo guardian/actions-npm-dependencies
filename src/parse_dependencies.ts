@@ -20,6 +20,7 @@ const package_parser = object({
   version: string(),
   dependencies: record(string()).optional(),
   devDependencies: record(string()).optional(),
+  peerDependencies: record(string()).optional(),
   known_issues: record(record(tuple([string(), string()]))).optional(),
 });
 
@@ -29,6 +30,7 @@ export const parse_package_info = (contents: unknown): Unrefined_dependency => {
     version,
     dependencies = {},
     devDependencies = {},
+    peerDependencies = {},
     known_issues = {},
   } = package_parser.parse(
     contents,
@@ -38,6 +40,7 @@ export const parse_package_info = (contents: unknown): Unrefined_dependency => {
     range: new Range(version),
     dependencies,
     devDependencies,
+    peerDependencies,
     known_issues,
   };
 };

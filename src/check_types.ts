@@ -1,24 +1,27 @@
 import { major, minor, minVersion } from "./deps.ts";
+import { Dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 
 export const filter_types = (dependencies: string[]) =>
   dependencies.filter((dependency) => dependency.startsWith("@types/"));
 
-export const matched_types = (dependencies: [string, string][]) =>
-  dependencies.map(([name, range]) => {
-    const [, type_range] = dependencies.find(([other_name]) =>
+export const matched_types = (dependencies: Dependency[]) =>
+  dependencies.map(({ name, range }) => {
+    const { range: type_range } = dependencies.find(({ name: other_name }) =>
       other_name === `@types/${name}`
-    ) ?? [];
+    ) ?? {};
 
     return type_range ? { name, range, type_range } : undefined;
   }).filter(isDefined);
 
+const PIN_OR_TILDE = /^(~|\d)/;
+
 export const mismatches = (dependencies: ReturnType<typeof matched_types>) =>
   dependencies.map(({ name, range, type_range }) => {
-    if (range.startsWith("^") || type_range.startsWith("^")) {
+    if (!range.raw.match(PIN_OR_TILDE) || !type_range.raw.match(PIN_OR_TILDE)) {
       return [
         name,
-        "Invalid caret (^) notation. Use tilde (~) instead",
+        "Invalid notation. Only pinned and tilde (~) ranges allowed",
       ] as const;
     }
 
