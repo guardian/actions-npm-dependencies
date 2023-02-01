@@ -1,5 +1,5 @@
 import { major, minor, minVersion } from "./deps.ts";
-import { Dependency } from "./types.ts";
+import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 
 export const filter_types = (dependencies: string[]) =>
@@ -16,8 +16,24 @@ export const matched_types = (dependencies: Dependency[]) =>
 
 const PIN_OR_TILDE = /^(~|\d)/;
 
-export const mismatches = (dependencies: ReturnType<typeof matched_types>) =>
+interface Options {
+  known_issues?: Unrefined_dependency["known_issues"];
+}
+
+export const mismatches = (
+  dependencies: ReturnType<typeof matched_types>,
+  { known_issues }: Options = {},
+) =>
   dependencies.map(({ name, range, type_range }) => {
+    const known_issue = known_issues
+      ?.[`${name}@${range.raw}`]
+      ?.[`@types/${name}`];
+
+    if (known_issue) {
+      const [from, to] = known_issue;
+      if (from === type_range.raw && to === range.raw) return undefined;
+    }
+
     if (!range.raw.match(PIN_OR_TILDE) || !type_range.raw.match(PIN_OR_TILDE)) {
       return [
         name,

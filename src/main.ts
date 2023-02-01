@@ -68,7 +68,7 @@ const dependencies_from_package = parse_declared_dependencies(
 
 if (dependencies_from_package.length === 0) {
   if (verbose) {
-    console.info("╰ You have no dependencies and therefore no issues!");
+    console.info("╰─ You have no dependencies and therefore no issues!");
   }
   Deno.exit();
 }
@@ -84,13 +84,14 @@ if (duplicates.length > 0) {
 
 const definitely_typed_mismatches = mismatches(
   matched_types(dependencies_from_package),
+  { known_issues },
 );
 
 if (definitely_typed_mismatches.length > 0) {
   console.error(`╠╤ Mismatched ${colour.file("@types/*")} dependencies found!`);
   for (const [name, reason] of definitely_typed_mismatches) {
     console.error(
-      `║╰─ ${colour.invalid("✕")} ${colour.dependency(name)}: ${reason}`,
+      `║├─ ${colour.invalid("✕")} ${colour.dependency(name)}: ${reason}`,
     );
   }
 }
@@ -113,7 +114,9 @@ const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
 );
 
 const problems = number_of_mismatched_deps +
-  types_in_direct_dependencies.length + duplicates.length;
+  types_in_direct_dependencies.length +
+  duplicates.length +
+  definitely_typed_mismatches.length;
 
 console.info("║");
 console.info("╙───────────────────────────────────");
