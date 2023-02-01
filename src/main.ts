@@ -10,7 +10,7 @@ import {
   format_dependencies,
 } from "./find_mismatches.ts";
 import { parse } from "https://deno.land/std@0.168.0/flags/mod.ts";
-import { filter_types } from "./check_types.ts";
+import { filter_types, matched_types, mismatches } from "./check_types.ts";
 
 const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
   boolean: ["verbose", "cache"],
@@ -59,18 +59,16 @@ if (types_in_direct_dependencies.length > 0) {
   );
 }
 
-const dependencies_tuple: [name: string, range: string][] = [
-  dependencies,
-  devDependencies,
-].map((_) => Object.entries(_)).flat();
-
 const dependencies_from_package = parse_declared_dependencies(
-  dependencies_tuple,
+  [
+    dependencies,
+    devDependencies,
+  ].flatMap(Object.entries),
 );
 
 if (dependencies_from_package.length === 0) {
   if (verbose) {
-    console.info("╰ You have no dependencies and therefore no issues!");
+    console.info("╰─ You have no dependencies and therefore no issues!");
   }
   Deno.exit();
 }
@@ -81,6 +79,20 @@ if (duplicates.length > 0) {
   console.error(`╠╤ Duplicate dependencies found!`);
   for (const name of duplicates) {
     console.error(`║╰─ ${colour.invalid("✕")} ${colour.dependency(name)}`);
+  }
+}
+
+const definitely_typed_mismatches = mismatches(
+  matched_types(dependencies_from_package),
+  { known_issues },
+);
+
+if (definitely_typed_mismatches.length > 0) {
+  console.error(`╠╤ Mismatched ${colour.file("@types/*")} dependencies found!`);
+  for (const [name, reason] of definitely_typed_mismatches) {
+    console.error(
+      `║├─ ${colour.invalid("✕")} ${colour.dependency(name)}: ${reason}`,
+    );
   }
 }
 
@@ -102,7 +114,9 @@ const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
 );
 
 const problems = number_of_mismatched_deps +
-  types_in_direct_dependencies.length + duplicates.length;
+  types_in_direct_dependencies.length +
+  duplicates.length +
+  definitely_typed_mismatches.length;
 
 console.info("║");
 console.info("╙───────────────────────────────────");
@@ -125,7 +139,7 @@ if (problems === 0) {
   );
 }
 
-if (known_issues) {
+if (Object.keys(known_issues).length > 0) {
   console.info("");
   console.info(
     `${colour.subdued("□")} There are ${
