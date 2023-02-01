@@ -1,8 +1,8 @@
 import { colour, format } from "./colours.ts";
-import { RegistryDependency } from "./types.ts";
+import { Registry_dependency } from "./types.ts";
 
 export const count_unsatisfied_peer_dependencies = (
-  dependencies: RegistryDependency[],
+  dependencies: Registry_dependency[],
 ) =>
   dependencies.map(({ peers }) =>
     peers.filter((peer) => !peer.satisfied).length
@@ -10,7 +10,7 @@ export const count_unsatisfied_peer_dependencies = (
     .reduce((acc, curr) => acc + curr);
 
 export const format_dependencies = (
-  registry_dependencies: RegistryDependency[],
+  registry_dependencies: Registry_dependency[],
   verbose = true,
 ): void => {
   for (const { name, range, dependencies, peers } of registry_dependencies) {
