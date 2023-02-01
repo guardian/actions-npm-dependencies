@@ -1,6 +1,6 @@
 import { object, Range, record, string, tuple } from "./deps.ts";
 import { colour } from "./colours.ts";
-import { Dependency, UnrefinedDependency } from "./types.ts";
+import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 
 export const find_duplicates = (dependencies: Dependency[]): string[] => {
@@ -23,7 +23,7 @@ const package_parser = object({
   known_issues: record(record(tuple([string(), string()]))).optional(),
 });
 
-export const parse_package_info = (contents: unknown): UnrefinedDependency => {
+export const parse_package_info = (contents: unknown): Unrefined_dependency => {
   const {
     name,
     version,
