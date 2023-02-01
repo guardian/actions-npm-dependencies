@@ -1,8 +1,8 @@
 import { colour, format } from "./colours.ts";
-import { RegistryDependency } from "./types.ts";
+import { Registry_dependency } from "./types.ts";
 
 export const count_unsatisfied_peer_dependencies = (
-  dependencies: RegistryDependency[],
+  dependencies: Registry_dependency[],
 ) =>
   dependencies.map(({ peers }) =>
     peers.filter((peer) => !peer.satisfied).length
@@ -10,14 +10,15 @@ export const count_unsatisfied_peer_dependencies = (
     .reduce((acc, curr) => acc + curr);
 
 export const format_dependencies = (
-  registry_dependencies: RegistryDependency[],
+  registry_dependencies: Registry_dependency[],
   verbose = true,
 ): void => {
   for (const { name, range, dependencies, peers } of registry_dependencies) {
     const unsatisfied = peers.filter(({ satisfied }) => !satisfied);
     if (verbose || unsatisfied.length > 0) {
-      console.info(`│`);
-      console.info(`├─ ${format(name, range)}`);
+      const leg = (peers.length + dependencies.length) > 0 ? "╤" : "═";
+      console.info(`║`);
+      console.info(`╠${leg}═ ${format(name, range)}`);
     }
 
     let count = dependencies.length;
@@ -25,7 +26,7 @@ export const format_dependencies = (
       for (const dependency of dependencies) {
         const angle = peers.length === 0 && --count === 0 ? "╰" : "├";
         console.warn(
-          `│  ${angle}─ ${colour.version("▲")} ${
+          `║${angle}─ ${colour.version("△")} ${
             format(dependency.name, dependency.range)
           } – futher ${colour.file("dependencies")} not analysed`,
         );
@@ -40,7 +41,7 @@ export const format_dependencies = (
       if (satisfied) {
         if (verbose) {
           console.info(
-            `│  ${angle}─ ${colour.valid("○")} ${format(name, range)}`,
+            `║${angle}─ ${colour.valid("○")} ${format(name, range)}`,
           );
         }
       } else {
@@ -49,7 +50,7 @@ export const format_dependencies = (
           : "locally missing";
 
         console.error(
-          `│  ${angle}─ ${colour.invalid("✕")} ${
+          `║${angle}─ ${colour.invalid("✕")} ${
             format(name, range)
           } – ${reason}`,
         );

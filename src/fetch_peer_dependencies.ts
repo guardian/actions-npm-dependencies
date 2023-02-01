@@ -1,6 +1,7 @@
-import { get } from "./cache.ts";
+import { colour } from "./colours.ts";
 import {
   boolean,
+  inferred,
   minVersion,
   object,
   Range,
@@ -9,30 +10,75 @@ import {
   SemVer,
   string,
 } from "./deps.ts";
-import type { Dependency, RegistryDependency } from "./types.ts";
+import type {
+  Dependency,
+  Registry_dependency,
+  Unrefined_dependency,
+} from "./types.ts";
 
-const { parse } = object({
+const json_parser = object({
   version: string(),
   dependencies: record(string()).optional(),
   peerDependencies: record(string()).optional(),
   peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
 });
 
+interface Options {
+  known_issues?: Unrefined_dependency["known_issues"];
+  cache?: boolean;
+}
+
+type Parsed_JSON = inferred<typeof json_parser>;
+
+const registry_dependencies_cache = new Map<
+  string,
+  Parsed_JSON
+>();
+
+export const get_registry_dependency = async (
+  dependency: Dependency,
+  cache: boolean,
+): Promise<Parsed_JSON> => {
+  if (cache && registry_dependencies_cache.size === 0) {
+    const cached = JSON.parse(
+      localStorage.getItem("registry_dependencies_cache") ?? "[]",
+    );
+    for (const [key, value] of cached) {
+      registry_dependencies_cache.set(key, value);
+    }
+  }
+
+  const url = new URL(
+    `${dependency.name}@${minVersion(dependency.range)}/package.json`,
+    "https://unpkg.com/",
+  );
+
+  const found = registry_dependencies_cache.get(url.href);
+  if (cache && found) return found;
+
+  const registry_dependency = await fetch(url)
+    .then((res) => res.json())
+    .then((json) => json_parser.parse(json));
+
+  registry_dependencies_cache.set(url.href, registry_dependency);
+
+  if (cache) {
+    localStorage.setItem(
+      "registry_dependencies_cache",
+      JSON.stringify([...registry_dependencies_cache.entries()]),
+    );
+  }
+
+  return registry_dependency;
+};
+
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
-  cache?: Cache,
-): Promise<RegistryDependency[]> =>
+  { known_issues, cache }: Options = {},
+): Promise<Registry_dependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
-      get(
-        new URL(
-          `${dependency.name}@${minVersion(dependency.range)}/package.json`,
-          "https://unpkg.com/",
-        ),
-        cache,
-      )
-        .then((res) => res.json() as unknown)
-        .then((json) => parse(json))
+      get_registry_dependency(dependency, !!cache)
         .then((registry) => {
           const peers = Object.entries(registry.peerDependencies ?? {}).map(
             ([name, range]) => {
@@ -40,11 +86,19 @@ export const fetch_peer_dependencies = (
                 (dependency) => dependency.name === name,
               )?.range;
 
+              const known_issue = known_issues
+                ?.[`${dependency.name}@${dependency.range.raw}`]
+                ?.[name];
+
+              const comparative_range = known_issue
+                ? range.replace(...known_issue)
+                : range;
+
               const local_min_version = local_version
                 ? minVersion(local_version)
                 : null;
               const local_version_matches = local_min_version
-                ? satisfies(local_min_version, range)
+                ? satisfies(local_min_version, comparative_range)
                 : false;
 
               const is_optional = !!registry.peerDependenciesMeta?.[name]
@@ -70,8 +124,15 @@ export const fetch_peer_dependencies = (
                 try {
                   new Range(range);
                   return true;
-                } catch {
-                  console.warn("Invalid range:", `${name}@${range}`);
+                } catch (error) {
+                  const reason = error instanceof Error
+                    ? error.message
+                    : "unknown";
+                  console.warn(
+                    `╟─ ${colour.version("△")} ${
+                      colour.dependency(name)
+                    } (${reason})`,
+                  );
                 }
                 return false;
               },

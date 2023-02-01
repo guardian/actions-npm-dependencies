@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
     "noUncheckedIndexedAccess": true,
-    "lib": ["dom", "deno.ns"]
+    "lib": ["deno.window"]
   }
 }

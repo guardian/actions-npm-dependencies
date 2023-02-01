@@ -5,18 +5,19 @@ export interface Dependency {
   range: Range;
 }
 
-export interface UnrefinedDependency extends Dependency {
+export interface Unrefined_dependency extends Dependency {
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
+  known_issues: Record<string, Record<string, [from: string, to: string]>>;
 }
 
-export interface RegistryDependency extends Dependency {
+export interface Registry_dependency extends Dependency {
   version: SemVer;
   dependencies: Dependency[];
-  peers: PeerDependency[];
+  peers: Peer_dependency[];
 }
 
-export interface PeerDependency extends Dependency {
+export interface Peer_dependency extends Dependency {
   satisfied: boolean;
   local?: Range;
 }

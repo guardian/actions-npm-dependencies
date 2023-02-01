@@ -1,6 +1,6 @@
-import { object, Range, record, string } from "./deps.ts";
+import { object, Range, record, string, tuple } from "./deps.ts";
 import { colour } from "./colours.ts";
-import { Dependency, UnrefinedDependency } from "./types.ts";
+import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 
 export const find_duplicates = (dependencies: Dependency[]): string[] => {
@@ -20,14 +20,26 @@ const package_parser = object({
   version: string(),
   dependencies: record(string()).optional(),
   devDependencies: record(string()).optional(),
+  known_issues: record(record(tuple([string(), string()]))).optional(),
 });
 
-export const parse_package_info = (contents: unknown): UnrefinedDependency => {
-  const { name, version, dependencies = {}, devDependencies = {} } =
-    package_parser.parse(
-      contents,
-    );
-  return { name, range: new Range(version), dependencies, devDependencies };
+export const parse_package_info = (contents: unknown): Unrefined_dependency => {
+  const {
+    name,
+    version,
+    dependencies = {},
+    devDependencies = {},
+    known_issues = {},
+  } = package_parser.parse(
+    contents,
+  );
+  return {
+    name,
+    range: new Range(version),
+    dependencies,
+    devDependencies,
+    known_issues,
+  };
 };
 
 export const parse_declared_dependencies = (
@@ -37,12 +49,11 @@ export const parse_declared_dependencies = (
     try {
       return { name, range: new Range(range) };
     } catch (error: unknown) {
-      if (error instanceof Error) console.error(error.message);
+      const reason = error instanceof Error ? error.message : "unknown";
       console.warn(
-        "🚨 Ignored peer dependency",
+        `╟─ ${colour.version("△")}`,
         colour.dependency(name),
-        colour.subdued("@"),
-        colour.version(range),
+        `(${reason})`,
       );
     }
     return undefined;
