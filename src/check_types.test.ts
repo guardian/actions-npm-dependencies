@@ -78,3 +78,21 @@ Deno.test("will error on invalid minor ranges", () => {
     ["react", "Mismatching minor versions"],
   ]);
 });
+
+Deno.test("will allow known errors ", () => {
+  const mismatched = mismatches(
+    matched_types([
+      { name: "@types/scheduler", range: new Range("~0.16.2") },
+      { name: "scheduler", range: new Range("~0.23.0") },
+    ]),
+    {
+      known_issues: {
+        "scheduler@~0.23.0": {
+          "@types/scheduler": ["~0.16.2", "~0.23.0"],
+        },
+      },
+    },
+  );
+
+  assertEquals(mismatched, []);
+});

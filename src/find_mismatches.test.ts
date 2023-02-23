@@ -1,4 +1,5 @@
-import { assertEquals, Range, SemVer } from "./deps.ts";
+import { assertEquals } from "std/testing/asserts.ts";
+import { Range, SemVer } from "std/semver/mod.ts";
 
 import { count_unsatisfied_peer_dependencies } from "./find_mismatches.ts";
 
