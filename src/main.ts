@@ -53,7 +53,7 @@ const types_in_direct_dependencies = filter_types(Object.keys(dependencies));
 
 if (types_in_direct_dependencies.length > 0) {
   console.error(
-    `╟─ ${colour.invalid("✕")} ${
+    `╟─ ${colour.version("△")} ${
       colour.dependency("@types/*")
     } should only be present in devDependencies`,
   );
@@ -114,7 +114,6 @@ const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
 );
 
 const problems = number_of_mismatched_deps +
-  types_in_direct_dependencies.length +
   duplicates.length +
   definitely_typed_mismatches.length;
 
