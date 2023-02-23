@@ -1,4 +1,5 @@
-import { object, Range, record, string, tuple } from "./deps.ts";
+import { object, record, string, tuple } from "zod";
+import { Range } from "std/semver/mod.ts";
 import { colour } from "./colours.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";

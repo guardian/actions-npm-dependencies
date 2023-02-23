@@ -9,8 +9,8 @@ import {
   count_unsatisfied_peer_dependencies,
   format_dependencies,
 } from "./find_mismatches.ts";
-import { parse } from "https://deno.land/std@0.168.0/flags/mod.ts";
 import { filter_types, matched_types, mismatches } from "./check_types.ts";
+import { parse } from "std/flags/mod.ts";
 
 const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
   boolean: ["verbose", "cache"],

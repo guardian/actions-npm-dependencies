@@ -1,4 +1,4 @@
-import { major, minor, minVersion } from "./deps.ts";
+import { major, minor, minVersion } from "std/semver/mod.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 

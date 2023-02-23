@@ -1,4 +1,4 @@
-import { Range, SemVer } from "./deps.ts";
+import { Range, SemVer } from "std/semver/mod.ts";
 
 export interface Dependency {
   name: string;

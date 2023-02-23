@@ -1,15 +1,6 @@
 import { colour } from "./colours.ts";
-import {
-  boolean,
-  inferred,
-  minVersion,
-  object,
-  Range,
-  record,
-  satisfies,
-  SemVer,
-  string,
-} from "./deps.ts";
+import { minVersion, Range, satisfies, SemVer } from "std/semver/mod.ts";
+import { boolean, infer as inferred, object, record, string } from "zod";
 import type {
   Dependency,
   Registry_dependency,

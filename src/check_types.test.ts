@@ -1,4 +1,5 @@
-import { assertEquals, Range } from "./deps.ts";
+import { Range } from "std/semver/mod.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import { matched_types, mismatches } from "./check_types.ts";
 
 Deno.test("will not complain on types without an associated pacakge", () => {
