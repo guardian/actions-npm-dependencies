@@ -32,7 +32,8 @@ const fetch_all_dependencies = async (
 
     if (!map.has(`${name}@${version}`) && version) {
       const dependency = await get_registry_dependency(
-        { name, range: new Range(version) },
+        name,
+        version,
         true,
       );
 

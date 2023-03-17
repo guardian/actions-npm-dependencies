@@ -1,6 +1,7 @@
 {
   "name": "npm-dependencies",
   "version": "0.0.1",
+  "private": true,
   "dependencies": {
     "@types/node": "~18.11",
     "@guardian/source-foundations": "8.0.0",

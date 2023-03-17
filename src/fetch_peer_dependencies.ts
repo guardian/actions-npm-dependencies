@@ -18,12 +18,15 @@ import type {
   Unrefined_dependency,
 } from "./types.ts";
 
+const dependency = record(string()).optional();
+
 export const json_parser = object({
   name: string(),
   version: string(),
-  devDependencies: record(string()).optional(),
-  dependencies: record(string()).optional(),
-  peerDependencies: record(string()).optional(),
+  private: boolean().optional(),
+  dependencies: dependency,
+  devDependencies: dependency,
+  peerDependencies: dependency,
   peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
 });
 
@@ -40,7 +43,8 @@ const registry_dependencies_cache = new Map<
 >();
 
 export const get_registry_dependency = async (
-  dependency: Dependency,
+  name: string,
+  version: string,
   cache: boolean,
 ): Promise<Parsed_JSON> => {
   if (cache && registry_dependencies_cache.size === 0) {
@@ -53,7 +57,7 @@ export const get_registry_dependency = async (
   }
 
   const url = new URL(
-    `${dependency.name}@${minVersion(dependency.range)}/package.json`,
+    `${name}@${version}/package.json`,
     "https://unpkg.com/",
   );
 
@@ -63,6 +67,9 @@ export const get_registry_dependency = async (
   const registry_dependency = await fetch(url)
     .then((res) => res.json())
     .then((json) => json_parser.parse(json));
+
+  // We do not want to consider development dependencies
+  delete registry_dependency.devDependencies;
 
   registry_dependencies_cache.set(url.href, registry_dependency);
 
@@ -82,7 +89,12 @@ export const fetch_peer_dependencies = (
 ): Promise<Registry_dependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
-      get_registry_dependency(dependency, !!cache)
+      get_registry_dependency(
+        dependency.name,
+        // @ts-expect-error -- we’ll fix it later
+        minVersion(dependency.range),
+        !!cache,
+      )
         .then((registry) => {
           const peers = Object.entries(registry.peerDependencies ?? {}).map(
             ([name, range]) => {

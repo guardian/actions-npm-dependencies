@@ -5,6 +5,9 @@ export interface Dependency {
   range: Range;
 }
 
+export type DependencyIdentifier<T extends Dependency> =
+  `${T["name"]}@${T["range"]["raw"]}`;
+
 export interface Unrefined_dependency extends Dependency {
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
