@@ -1,5 +1,5 @@
-import { cyan, gray, green, red, underline, yellow } from "std/fmt/colors.ts";
-import { Range } from "std/semver/mod.ts";
+import { cyan, gray, green, red, underline, yellow } from  "https://deno.land/std@0.177.0/fmt/colors.ts";
+import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
 
 export const colour = {
   dependency: cyan,

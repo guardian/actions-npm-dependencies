@@ -10,7 +10,7 @@ import {
   format_dependencies,
 } from "./find_mismatches.ts";
 import { filter_types, matched_types, mismatches } from "./check_types.ts";
-import { parse } from "std/flags/mod.ts";
+import { parse } from  "https://deno.land/std@0.177.0/flags/mod.ts";
 
 const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
   boolean: ["verbose", "cache"],

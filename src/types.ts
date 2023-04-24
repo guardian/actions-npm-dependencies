@@ -1,4 +1,4 @@
-import { Range, SemVer } from "std/semver/mod.ts";
+import { Range, SemVer } from  "https://deno.land/std@0.177.0/semver/mod.ts";
 
 export interface Dependency {
   name: string;

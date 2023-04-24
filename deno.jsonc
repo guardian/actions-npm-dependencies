@@ -2,9 +2,5 @@
   "compilerOptions": {
     "noUncheckedIndexedAccess": true,
     "lib": ["deno.window"]
-  },
-  "imports": {
-    "std/": "https://deno.land/std@0.177.0/",
-    "zod": "https://esm.sh/zod@3.20.2"
   }
 }

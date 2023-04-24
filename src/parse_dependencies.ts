@@ -1,5 +1,5 @@
-import { object, record, string, tuple } from "zod";
-import { Range } from "std/semver/mod.ts";
+import { object, record, string, tuple } from "https://esm.sh/zod@3.20.2";
+import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
 import { colour } from "./colours.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";

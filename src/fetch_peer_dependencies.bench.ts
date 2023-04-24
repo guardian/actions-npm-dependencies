@@ -1,4 +1,4 @@
-import { Range } from "std/semver/mod.ts";
+import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
 import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 
 Deno.bench("Fetch without cache", async () => {

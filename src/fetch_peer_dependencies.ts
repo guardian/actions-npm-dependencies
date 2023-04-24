@@ -1,14 +1,27 @@
 import { colour } from "./colours.ts";
-import { minVersion, Range, satisfies, SemVer } from "std/semver/mod.ts";
-import { boolean, infer as inferred, object, record, string } from "zod";
+import {
+  minVersion,
+  Range,
+  satisfies,
+  SemVer,
+} from "https://deno.land/std@0.177.0/semver/mod.ts";
+import {
+  boolean,
+  infer as inferred,
+  object,
+  record,
+  string,
+} from "https://esm.sh/zod@3.20.2";
 import type {
   Dependency,
   Registry_dependency,
   Unrefined_dependency,
 } from "./types.ts";
 
-const json_parser = object({
+export const json_parser = object({
+  name: string(),
   version: string(),
+  devDependencies: record(string()).optional(),
   dependencies: record(string()).optional(),
   peerDependencies: record(string()).optional(),
   peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
