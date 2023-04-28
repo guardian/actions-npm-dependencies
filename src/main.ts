@@ -21,9 +21,7 @@ export const package_health = async (
   { verbose, cache }: Options,
 ): Promise<number> => {
   const { name, range, dependencies, devDependencies, known_issues } =
-    parse_package_info(
-      package_content,
-    );
+    parse_package_info(package_content);
 
   console.info(
     `╔═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╗`,

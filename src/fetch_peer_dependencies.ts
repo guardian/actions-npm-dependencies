@@ -78,6 +78,19 @@ export const get_registry_dependency = async (
   return registry_dependency;
 };
 
+const is_valid_range = ([name, range]: [string, string]) => {
+  try {
+    new Range(range);
+    return true;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown";
+    console.warn(
+      `╟─ ${colour.version("△")} ${colour.dependency(name)} (${reason})`,
+    );
+  }
+  return false;
+};
+
 export const fetch_peer_dependencies = (
   dependencies: Dependency[],
   { known_issues, cache }: Options = {},
@@ -121,7 +134,7 @@ export const fetch_peer_dependencies = (
 
               return {
                 name,
-                range: new Range(range),
+                range: new Range(range.replaceAll(/ +/g, "")),
                 satisfied,
                 local: local_version,
               };
@@ -130,26 +143,9 @@ export const fetch_peer_dependencies = (
 
           return {
             ...dependency,
-            dependencies: Object.entries(registry.dependencies ?? {}).filter(
-              ([name, range]) => {
-                try {
-                  new Range(range);
-                  return true;
-                } catch (error) {
-                  const reason = error instanceof Error
-                    ? error.message
-                    : "unknown";
-                  console.warn(
-                    `╟─ ${colour.version("△")} ${
-                      colour.dependency(name)
-                    } (${reason})`,
-                  );
-                }
-                return false;
-              },
-            ).map(
-              ([name, range]) => ({ name, range: new Range(range) }),
-            ),
+            dependencies: Object.entries(registry.dependencies ?? {})
+              .filter(is_valid_range)
+              .map(([name, range]) => ({ name, range: new Range(range) })),
             peers,
             version: new SemVer(registry.version),
           };

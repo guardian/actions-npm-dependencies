@@ -1,6 +1,7 @@
 import { parse } from "https://deno.land/std@0.185.0/flags/mod.ts";
 import { colour } from "./colours.ts";
 import { package_health } from "./main.ts";
+import { resolve } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
   boolean: ["verbose", "cache"],
@@ -13,16 +14,14 @@ if (typeof package_file !== "string") {
   Deno.exit(1);
 }
 
-const filename = Deno.cwd() + "/" + package_file;
+const is_remote_file = package_file.match(/^https?:\/\/.+/);
 
-const package_content: unknown = await Deno.readTextFile(filename).catch(() =>
-  ""
-).then(
-  (contents) => JSON.parse(contents),
-);
+const package_content: unknown = is_remote_file
+  ? await fetch(package_file).then((r) => r.json())
+  : await Deno.readTextFile(resolve(package_file)).then(JSON.parse);
 
 if (!package_content) {
-  console.error("🚨 No package.json found at", colour.file(filename));
+  console.error("🚨 No package.json found at", colour.file(package_file));
   Deno.exit(1);
 }
 
