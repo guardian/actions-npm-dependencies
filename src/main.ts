@@ -17,11 +17,15 @@ import {
 } from "./check_types.ts";
 import { parse } from "https://deno.land/std@0.185.0/flags/mod.ts";
 
+const triangle = colour.version("△");
+const cross = colour.invalid("✕");
+const square = colour.subdued("□");
+const circle = colour.valid("○");
+
 interface Options {
   verbose: boolean;
   cache: boolean;
 }
-
 export const package_health = async (
   package_content: unknown,
   { verbose, cache }: Options,
@@ -41,7 +45,7 @@ export const package_health = async (
   const type = package_info.private ? "app" : "lib";
 
   console.info(
-    `╟─ ${colour.subdued("□")} Package identified as ${
+    `╟─ ${square} Package identified as ${
       colour.dependency(type)
     } because private is ${colour.version(package_info.private.toString())}`,
   );
@@ -53,7 +57,13 @@ export const package_health = async (
 
   if (types_in_direct_dependencies.length > 0) {
     console.error(
-      `╟─ ${colour.version("△")} ${
+      `╟─ ${triangle} ${
+        colour.dependency("@types/*")
+      } should only be present in devDependencies`,
+    );
+  } else {
+    console.info(
+      `╟─ ${circle} ${
         colour.dependency("@types/*")
       } should only be present in devDependencies`,
     );
@@ -78,7 +88,7 @@ export const package_health = async (
   if (duplicates.length > 0) {
     console.error(`╠╤ Duplicate dependencies found!`);
     for (const name of duplicates) {
-      console.error(`║╰─ ${colour.invalid("✕")} ${colour.dependency(name)}`);
+      console.error(`║╰─ ${cross} ${colour.dependency(name)}`);
     }
   }
 
@@ -93,9 +103,7 @@ export const package_health = async (
     );
     for (const [name, reason] of definitely_typed_mismatches) {
       console.error(
-        `║├─ ${colour.invalid("✕")} ${
-          colour.dependency("@types/" + name)
-        }: ${reason}`,
+        `║├─ ${cross} ${colour.dependency("@types/" + name)}: ${reason}`,
       );
     }
   }
@@ -126,17 +134,15 @@ export const package_health = async (
 
   if (problems === 0) {
     if (verbose) {
-      console.info(`${colour.valid("○")} Dependencies are in good shape`);
+      console.info(`${circle} Dependencies are in good shape`);
     }
   } else if (problems === 1) {
     console.error(
-      `${colour.invalid("✕")} There is ${
-        colour.invalid("1")
-      } dependencies problem`,
+      `${cross} There is ${colour.invalid("1")} dependencies problem`,
     );
   } else {
     console.error(
-      `${colour.invalid("✕")} There are ${
+      `${cross} There are ${
         colour.invalid(String(problems))
       } dependencies problems`,
     );
@@ -145,17 +151,15 @@ export const package_health = async (
   if (Object.keys(known_issues).length > 0) {
     console.info("");
     console.info(
-      `${colour.subdued("□")} There are ${
-        Object.keys(known_issues).length
-      } known issues:`,
+      `${square} There are ${Object.keys(known_issues).length} known issues:`,
     );
     for (const [name, issues] of Object.entries(known_issues)) {
       console.info(`${colour.dependency(name)}`);
       for (const [dependency, [from, to]] of Object.entries(issues)) {
         console.info(
-          `${colour.subdued("□")} Substituted ${
-            colour.dependency(dependency)
-          }@${colour.version(to)}`,
+          `${square} Substituted ${colour.dependency(dependency)}@${
+            colour.version(to)
+          }`,
           `(specified @${colour.version(from)})`,
         );
       }
