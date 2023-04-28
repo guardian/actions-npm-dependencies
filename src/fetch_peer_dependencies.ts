@@ -137,7 +137,8 @@ export const fetch_peer_dependencies = (
                 range: new Range(range.replaceAll(/ +/g, "")),
                 satisfied,
                 local: local_version,
-              };
+                type: "lib",
+              } as const;
             },
           );
 
@@ -145,7 +146,11 @@ export const fetch_peer_dependencies = (
             ...dependency,
             dependencies: Object.entries(registry.dependencies ?? {})
               .filter(is_valid_range)
-              .map(([name, range]) => ({ name, range: new Range(range) })),
+              .map(([name, range]) => ({
+                name,
+                range: new Range(range),
+                type: "lib",
+              } as const)),
             peers,
             version: new SemVer(registry.version),
           };

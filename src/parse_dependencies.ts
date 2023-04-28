@@ -21,6 +21,7 @@ const dependency = z.record(z.string());
 const package_parser = z.object({
   name: z.string(),
   version: z.string(),
+  private: z.boolean(),
   dependencies: dependency.optional(),
   devDependencies: dependency.optional(),
   peerDependencies: dependency.optional(),
@@ -33,6 +34,7 @@ export const parse_package_info = (contents: unknown): Unrefined_dependency => {
   const {
     name,
     version,
+    private: _private,
     dependencies = {},
     devDependencies = {},
     peerDependencies = {},
@@ -43,6 +45,7 @@ export const parse_package_info = (contents: unknown): Unrefined_dependency => {
   return {
     name,
     range: new Range(version),
+    type: _private ? "app" : "lib",
     dependencies,
     devDependencies,
     peerDependencies,
@@ -55,7 +58,7 @@ export const parse_declared_dependencies = (
 ): Dependency[] =>
   dependencies.map(([name, range]) => {
     try {
-      return { name, range: new Range(range) };
+      return { name, range: new Range(range), type: "lib" } as const;
     } catch (error: unknown) {
       const reason = error instanceof Error ? error.message : "unknown";
       console.warn(

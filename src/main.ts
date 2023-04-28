@@ -20,15 +20,15 @@ export const package_health = async (
   package_content: unknown,
   { verbose, cache }: Options,
 ): Promise<number> => {
-  const { name, range, dependencies, devDependencies, known_issues } =
+  const { name, range, dependencies, devDependencies, known_issues, type } =
     parse_package_info(package_content);
 
   console.info(
-    `╔═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╗`,
+    `╔═${"═".repeat(name.length + 6)}╪${"═".repeat(range.range.length)}═╗`,
   );
-  console.info(`╫ ${format(name, range)} ╫`);
+  console.info(`╫ ${colour.valid(type)} : ${format(name, range)} ╫`);
   console.info(
-    `╠═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╝`,
+    `╠═${"═".repeat(name.length + 6)}╪${"═".repeat(range.range.length)}═╝`,
   );
 
   const types_in_direct_dependencies = filter_types(Object.keys(dependencies));

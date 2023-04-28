@@ -3,6 +3,7 @@ import { Range, SemVer } from "https://deno.land/std@0.185.0/semver/mod.ts";
 export interface Dependency {
   name: string;
   range: Range;
+  type: "app" | "lib";
 }
 
 export type DependencyIdentifier<T extends Dependency> =
