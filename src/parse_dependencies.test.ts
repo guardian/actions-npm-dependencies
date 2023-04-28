@@ -1,5 +1,5 @@
-import { assertEquals } from  "https://deno.land/std@0.177.0/testing/asserts.ts";
-import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { Range } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import {
   find_duplicates,
   parse_declared_dependencies,

@@ -1,5 +1,5 @@
-import { assertEquals } from  "https://deno.land/std@0.177.0/testing/asserts.ts";
-import { Range, SemVer } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { Range, SemVer } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 
 Deno.test("Can get peer dependencies", async () => {

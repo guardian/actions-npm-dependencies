@@ -1,4 +1,8 @@
-import { major, minor, minVersion } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import {
+  major,
+  minor,
+  minVersion,
+} from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
 

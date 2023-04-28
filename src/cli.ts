@@ -1,4 +1,4 @@
-import { parse } from "std/flags/mod.ts";
+import { parse } from "https://deno.land/std@0.185.0/flags/mod.ts";
 import { colour } from "./colours.ts";
 import { package_health } from "./main.ts";
 

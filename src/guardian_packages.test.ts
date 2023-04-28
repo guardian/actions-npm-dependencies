@@ -7,5 +7,4 @@ const get_package = (repo: string) =>
   ).then((r) => r.json());
 
 Deno.test("dotcom-rendering", async () => {
-  
 });

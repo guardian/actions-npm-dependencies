@@ -1,5 +1,5 @@
-import { object, record, string, tuple } from "https://esm.sh/zod@3.20.2";
-import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import z from "https://deno.land/x/zod@v3.21.4/index.ts";
+import { Range } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { colour } from "./colours.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
 import { isDefined } from "./utils.ts";
@@ -16,13 +16,17 @@ export const find_duplicates = (dependencies: Dependency[]): string[] => {
   return [...duplicates];
 };
 
-const package_parser = object({
-  name: string(),
-  version: string(),
-  dependencies: record(string()).optional(),
-  devDependencies: record(string()).optional(),
-  peerDependencies: record(string()).optional(),
-  known_issues: record(record(tuple([string(), string()]))).optional(),
+const dependency = z.record(z.string());
+
+const package_parser = z.object({
+  name: z.string(),
+  version: z.string(),
+  dependencies: dependency.optional(),
+  devDependencies: dependency.optional(),
+  peerDependencies: dependency.optional(),
+  known_issues: z.record(z.record(
+    z.tuple([z.string(), z.string()]),
+  )).optional(),
 });
 
 export const parse_package_info = (contents: unknown): Unrefined_dependency => {

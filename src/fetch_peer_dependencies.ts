@@ -4,30 +4,25 @@ import {
   Range,
   satisfies,
   SemVer,
-} from "https://deno.land/std@0.177.0/semver/mod.ts";
-import {
-  boolean,
-  infer as inferred,
-  object,
-  record,
-  string,
-} from "https://esm.sh/zod@3.20.2";
+} from "https://deno.land/std@0.185.0/semver/mod.ts";
+import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 import type {
   Dependency,
   Registry_dependency,
   Unrefined_dependency,
 } from "./types.ts";
 
-const dependency = record(string()).optional();
+const dependency = z.record(z.string()).optional();
 
-export const json_parser = object({
-  name: string(),
-  version: string(),
-  private: boolean().optional(),
+export const json_parser = z.object({
+  name: z.string(),
+  version: z.string(),
+  private: z.boolean().optional(),
   dependencies: dependency,
   devDependencies: dependency,
   peerDependencies: dependency,
-  peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
+  peerDependenciesMeta: z.record(z.object({ optional: z.boolean() }))
+    .optional(),
 });
 
 interface Options {
@@ -35,7 +30,7 @@ interface Options {
   cache?: boolean;
 }
 
-type Parsed_JSON = inferred<typeof json_parser>;
+type Parsed_JSON = z.infer<typeof json_parser>;
 
 const registry_dependencies_cache = new Map<
   string,

@@ -73,11 +73,13 @@ export const package_health = async (
 
   if (definitely_typed_mismatches.length > 0) {
     console.error(
-      `╠╤ Mismatched ${colour.file("@types/*")} dependencies found!`,
+      `╠╤ Mismatched ${colour.dependency("@types/*")} dependencies found!`,
     );
     for (const [name, reason] of definitely_typed_mismatches) {
       console.error(
-        `║├─ ${colour.invalid("✕")} ${colour.dependency(name)}: ${reason}`,
+        `║├─ ${colour.invalid("✕")} ${
+          colour.dependency("@types/" + name)
+        }: ${reason}`,
       );
     }
   }

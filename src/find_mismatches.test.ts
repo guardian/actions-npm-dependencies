@@ -1,5 +1,5 @@
-import { assertEquals } from  "https://deno.land/std@0.177.0/testing/asserts.ts";
-import { Range, SemVer } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { Range, SemVer } from "https://deno.land/std@0.185.0/semver/mod.ts";
 
 import { count_unsatisfied_peer_dependencies } from "./find_mismatches.ts";
 

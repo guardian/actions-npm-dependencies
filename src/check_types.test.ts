@@ -1,8 +1,8 @@
-import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
-import { assertEquals } from  "https://deno.land/std@0.177.0/testing/asserts.ts";
+import { Range } from "https://deno.land/std@0.185.0/semver/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
 import { matched_types, mismatches } from "./check_types.ts";
 
-Deno.test("will not complain on types without an associated pacakge", () => {
+Deno.test("will not complain on types without an associated package", () => {
   const mismatches = matched_types([
     { name: "@types/node", range: new Range("~8.11") },
     { name: "typescript", range: new Range("^4.9") },
@@ -11,7 +11,7 @@ Deno.test("will not complain on types without an associated pacakge", () => {
   assertEquals(mismatches, []);
 });
 
-Deno.test("will find potential mismatches on types with an associated pacakge", () => {
+Deno.test("will find potential mismatches on types with an associated package", () => {
   const matched = matched_types([
     { name: "@types/react", range: new Range("~16.1") },
     { name: "react", range: new Range("^16.1") },

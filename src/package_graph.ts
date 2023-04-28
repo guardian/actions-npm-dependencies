@@ -1,12 +1,12 @@
-import { minVersion, Range } from "https://deno.land/std@0.177.0/semver/mod.ts";
+import { minVersion } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import {
   get_registry_dependency,
   json_parser,
 } from "./fetch_peer_dependencies.ts";
 
-import { infer as inferred } from "https://esm.sh/zod@3.20.2";
+import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 
-type Dependency = inferred<typeof json_parser>;
+type Dependency = z.infer<typeof json_parser>;
 type Identifier = `${string}@${string}`;
 
 const get_identifier = (
