@@ -12,8 +12,6 @@ deno run \
     --cache
 ```
 
-> **Note**
->
 > - The `--cache` flag should help with speedups
 > - The `--verbose` flag is very verbose
 

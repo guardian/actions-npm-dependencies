@@ -1,5 +1,6 @@
 import {
   find_duplicates,
+  package_parser,
   parse_declared_dependencies,
   parse_package_info,
 } from "./parse_dependencies.ts";
@@ -9,7 +10,12 @@ import {
   count_unsatisfied_peer_dependencies,
   format_dependencies,
 } from "./find_mismatches.ts";
-import { filter_types, matched_types, mismatches } from "./check_types.ts";
+import {
+  get_types_in_direct_dependencies,
+  mismatches,
+  types_matching_dependencies,
+} from "./check_types.ts";
+import { parse } from "https://deno.land/std@0.185.0/flags/mod.ts";
 
 interface Options {
   verbose: boolean;
@@ -20,18 +26,30 @@ export const package_health = async (
   package_content: unknown,
   { verbose, cache }: Options,
 ): Promise<number> => {
-  const { name, range, dependencies, devDependencies, known_issues, type } =
+  const { name, range, dependencies, devDependencies, known_issues } =
     parse_package_info(package_content);
+  const package_info = package_parser.parse(package_content);
 
   console.info(
-    `╔═${"═".repeat(name.length + 6)}╪${"═".repeat(range.range.length)}═╗`,
+    `╔═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╗`,
   );
-  console.info(`╫ ${colour.valid(type)} : ${format(name, range)} ╫`);
+  console.info(`╫ ${format(name, range)} ╫`);
   console.info(
-    `╠═${"═".repeat(name.length + 6)}╪${"═".repeat(range.range.length)}═╝`,
+    `╠═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╝`,
   );
 
-  const types_in_direct_dependencies = filter_types(Object.keys(dependencies));
+  const type = package_info.private ? "app" : "lib";
+
+  console.info(
+    `╟─ ${colour.subdued("□")} Package identified as ${
+      colour.dependency(type)
+    } because private is ${colour.version(package_info.private.toString())}`,
+  );
+  console.info("║");
+
+  const types_in_direct_dependencies = get_types_in_direct_dependencies(
+    package_info,
+  );
 
   if (types_in_direct_dependencies.length > 0) {
     console.error(
@@ -65,7 +83,7 @@ export const package_health = async (
   }
 
   const definitely_typed_mismatches = mismatches(
-    matched_types(dependencies_from_package),
+    types_matching_dependencies(package_info),
     { known_issues },
   );
 
@@ -148,3 +166,35 @@ export const package_health = async (
 
   return problems;
 };
+
+if (import.meta.main) {
+  const { _: [package_file], verbose, cache, errors: expected_errors } = parse(
+    Deno.args,
+    {
+      boolean: ["verbose", "cache"],
+      negatable: ["cache"],
+      default: { errors: 0 },
+    },
+  );
+
+  if (typeof package_file !== "string") {
+    console.error("🚨 No package.json passed as argument");
+    Deno.exit(1);
+  }
+
+  const filename = Deno.cwd() + "/" + package_file;
+
+  const package_content: unknown = await Deno.readTextFile(filename)
+    .catch(() => "").then(JSON.parse);
+
+  if (!package_content) {
+    console.error("🚨 No package.json found at", colour.file(filename));
+    Deno.exit(1);
+  }
+
+  const errors = await package_health(package_content, { verbose, cache });
+
+  if (typeof expected_errors !== "number" || errors != expected_errors) {
+    Deno.exit(errors);
+  }
+}

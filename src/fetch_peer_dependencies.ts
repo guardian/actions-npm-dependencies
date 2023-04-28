@@ -5,43 +5,30 @@ import {
   satisfies,
   SemVer,
 } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 import type {
   Dependency,
   Registry_dependency,
   Unrefined_dependency,
 } from "./types.ts";
-
-const dependency = z.record(z.string()).optional();
-
-export const json_parser = z.object({
-  name: z.string(),
-  version: z.string(),
-  private: z.boolean().optional(),
-  dependencies: dependency,
-  devDependencies: dependency,
-  peerDependencies: dependency,
-  peerDependenciesMeta: z.record(z.object({ optional: z.boolean() }))
-    .optional(),
-});
+import { package_parser } from "./parse_dependencies.ts";
+import { Package } from "./parse_dependencies.ts";
 
 interface Options {
   known_issues?: Unrefined_dependency["known_issues"];
   cache?: boolean;
 }
 
-type Parsed_JSON = z.infer<typeof json_parser>;
-
 const registry_dependencies_cache = new Map<
   string,
-  Parsed_JSON
+  Package
 >();
 
+/** */
 export const get_registry_dependency = async (
   name: string,
   version: string,
   cache: boolean,
-): Promise<Parsed_JSON> => {
+): Promise<Package> => {
   if (cache && registry_dependencies_cache.size === 0) {
     const cached = JSON.parse(
       localStorage.getItem("registry_dependencies_cache") ?? "[]",
@@ -61,10 +48,10 @@ export const get_registry_dependency = async (
 
   const registry_dependency = await fetch(url)
     .then((res) => res.json())
-    .then((json) => json_parser.parse(json));
+    .then(package_parser.parse);
 
   // We do not want to consider development dependencies
-  delete registry_dependency.devDependencies;
+  registry_dependency.devDependencies = {};
 
   registry_dependencies_cache.set(url.href, registry_dependency);
 
@@ -73,6 +60,8 @@ export const get_registry_dependency = async (
       "registry_dependencies_cache",
       JSON.stringify([...registry_dependencies_cache.entries()]),
     );
+  } else {
+    localStorage.removeItem("registry_dependencies_cache");
   }
 
   return registry_dependency;
@@ -137,8 +126,7 @@ export const fetch_peer_dependencies = (
                 range: new Range(range.replaceAll(/ +/g, "")),
                 satisfied,
                 local: local_version,
-                type: "lib",
-              } as const;
+              };
             },
           );
 
@@ -149,8 +137,7 @@ export const fetch_peer_dependencies = (
               .map(([name, range]) => ({
                 name,
                 range: new Range(range),
-                type: "lib",
-              } as const)),
+              })),
             peers,
             version: new SemVer(registry.version),
           };

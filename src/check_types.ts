@@ -3,20 +3,37 @@ import {
   minor,
   minVersion,
 } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { Dependency, Unrefined_dependency } from "./types.ts";
-import { isDefined } from "./utils.ts";
+import { Unrefined_dependency } from "./types.ts";
+import { non_nullable } from "./utils.ts";
+import { Package } from "./parse_dependencies.ts";
 
-export const filter_types = (dependencies: string[]) =>
-  dependencies.filter((dependency) => dependency.startsWith("@types/"));
+const is_type_dependency = (
+  dependency: string,
+): dependency is `@types/${string}` => dependency.startsWith("@types/");
 
-export const matched_types = (dependencies: Dependency[]) =>
-  dependencies.map(({ name, range }) => {
-    const { range: type_range } = dependencies.find(({ name: other_name }) =>
-      other_name === `@types/${name}`
-    ) ?? {};
+export const get_types_in_direct_dependencies = ({ dependencies }: Package) =>
+  Object.keys(dependencies).filter(is_type_dependency);
 
-    return type_range ? { name, range, type_range } : undefined;
-  }).filter(isDefined);
+export const types_matching_dependencies = (
+  { dependencies, devDependencies }: Pick<
+    Package,
+    "dependencies" | "devDependencies"
+  >,
+) =>
+  Object.entries(devDependencies)
+    .filter(([name]) => is_type_dependency(name))
+    .map(([name_typed, version_typed]) => {
+      const [name_untyped, version_untyped] = [
+        dependencies,
+        devDependencies,
+      ].flatMap((_) => Object.entries(_))
+        .find(([name_untyped]) => "@types/" + name_untyped === name_typed) ??
+        [];
+
+      return name_untyped && version_untyped
+        ? { name_typed, name_untyped, version_typed, version_untyped }
+        : undefined;
+    }).filter(non_nullable);
 
 const PIN_OR_TILDE = /^(~|\d)/;
 
@@ -25,39 +42,44 @@ interface Options {
 }
 
 export const mismatches = (
-  dependencies: ReturnType<typeof matched_types>,
+  dependencies: ReturnType<typeof types_matching_dependencies>,
   { known_issues }: Options = {},
 ) =>
-  dependencies.map(({ name, range, type_range }) => {
-    const known_issue = known_issues
-      ?.[`${name}@${range.raw}`]
-      ?.[`@types/${name}`];
+  dependencies.map(
+    ({ name_untyped, name_typed, version_typed, version_untyped }) => {
+      const known_issue = known_issues
+        ?.[`${name_untyped}@${version_untyped}`]
+        ?.[name_typed];
 
-    if (known_issue) {
-      const [from, to] = known_issue;
-      if (from === type_range.raw && to === range.raw) return undefined;
-    }
+      if (known_issue) {
+        const [from, to] = known_issue;
+        if (from === version_typed && to === version_untyped) return undefined;
+      }
 
-    if (!range.raw.match(PIN_OR_TILDE) || !type_range.raw.match(PIN_OR_TILDE)) {
-      return [
-        name,
-        "Invalid notation. Only pinned and tilde (~) ranges allowed",
-      ] as const;
-    }
+      if (
+        !version_untyped.match(PIN_OR_TILDE) ||
+        !version_typed.match(PIN_OR_TILDE)
+      ) {
+        return [
+          name_untyped,
+          "Invalid notation. Only pinned and tilde (~) ranges allowed",
+        ] as const;
+      }
 
-    const main_min = minVersion(range);
-    const type_min = minVersion(type_range);
+      const main_min = minVersion(version_untyped);
+      const type_min = minVersion(version_typed);
 
-    if (!main_min || !type_min) {
-      return [name, "Invalid range or version types"] as const;
-    }
+      if (!main_min || !type_min) {
+        return [name_untyped, "Invalid range or version types"] as const;
+      }
 
-    if (major(main_min) !== major(type_min)) {
-      return [name, "Mismatching major versions"] as const;
-    }
-    if (minor(main_min) !== minor(type_min)) {
-      return [name, "Mismatching minor versions"] as const;
-    }
+      if (major(main_min) !== major(type_min)) {
+        return [name_untyped, "Mismatching major versions"] as const;
+      }
+      if (minor(main_min) !== minor(type_min)) {
+        return [name_untyped, "Mismatching minor versions"] as const;
+      }
 
-    return undefined;
-  }).filter(isDefined);
+      return undefined;
+    },
+  ).filter(non_nullable);

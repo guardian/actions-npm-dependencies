@@ -2,7 +2,7 @@ import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 import { Range } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { colour } from "./colours.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
-import { isDefined } from "./utils.ts";
+import { non_nullable } from "./utils.ts";
 
 export const find_duplicates = (dependencies: Dependency[]): string[] => {
   const seen = new Set<string>();
@@ -18,17 +18,23 @@ export const find_duplicates = (dependencies: Dependency[]): string[] => {
 
 const dependency = z.record(z.string());
 
-const package_parser = z.object({
+const known_issues = z.record(z.record(
+  z.tuple([z.string(), z.string()]),
+)).default({});
+
+export const package_parser = z.object({
   name: z.string(),
   version: z.string(),
-  private: z.boolean(),
-  dependencies: dependency.optional(),
-  devDependencies: dependency.optional(),
-  peerDependencies: dependency.optional(),
-  known_issues: z.record(z.record(
-    z.tuple([z.string(), z.string()]),
-  )).optional(),
+  private: z.boolean().default(false),
+  dependencies: dependency.default({}),
+  devDependencies: dependency.default({}),
+  peerDependencies: dependency.default({}),
+  peerDependenciesMeta: z.record(z.object({ optional: z.boolean() }))
+    .default({}),
+  known_issues,
 });
+
+export type Package = z.infer<typeof package_parser>;
 
 export const parse_package_info = (contents: unknown): Unrefined_dependency => {
   const {
@@ -45,7 +51,6 @@ export const parse_package_info = (contents: unknown): Unrefined_dependency => {
   return {
     name,
     range: new Range(version),
-    type: _private ? "app" : "lib",
     dependencies,
     devDependencies,
     peerDependencies,
@@ -58,7 +63,7 @@ export const parse_declared_dependencies = (
 ): Dependency[] =>
   dependencies.map(([name, range]) => {
     try {
-      return { name, range: new Range(range), type: "lib" } as const;
+      return { name, range: new Range(range) };
     } catch (error: unknown) {
       const reason = error instanceof Error ? error.message : "unknown";
       console.warn(
@@ -68,4 +73,4 @@ export const parse_declared_dependencies = (
       );
     }
     return undefined;
-  }).filter(isDefined).flat();
+  }).filter(non_nullable).flat();
