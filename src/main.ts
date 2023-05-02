@@ -63,9 +63,7 @@ export const package_health = async (
     );
   } else {
     console.info(
-      `╟─ ${circle} ${
-        colour.dependency("@types/*")
-      } should only be present in devDependencies`,
+      `╟─ ${circle} All @types/* listed in devDependencies`,
     );
   }
 
