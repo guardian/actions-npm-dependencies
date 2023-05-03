@@ -198,5 +198,12 @@ if (import.meta.main) {
 
   if (typeof expected_errors !== "number" || errors != expected_errors) {
     Deno.exit(errors);
+  } else {
+    console.info(
+      "(Expected exactly",
+      expected_errors,
+      "errors – exiting gracefully)",
+    );
+    Deno.exit();
   }
 }
