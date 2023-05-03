@@ -1,12 +1,9 @@
-import { minVersion, Range } from "https://deno.land/std@0.177.0/semver/mod.ts";
-import {
-  get_registry_dependency,
-  json_parser,
-} from "./fetch_peer_dependencies.ts";
+import { minVersion } from "https://deno.land/std@0.185.0/semver/mod.ts";
+import z from "https://deno.land/x/zod@v3.21.4/index.ts";
+import { get_registry_dependency } from "./fetch_peer_dependencies.ts";
+import { package_parser } from "./parse_dependencies.ts";
 
-import { infer as inferred } from "https://esm.sh/zod@3.20.2";
-
-type Dependency = inferred<typeof json_parser>;
+type Dependency = z.infer<typeof package_parser>;
 type Identifier = `${string}@${string}`;
 
 const get_identifier = (
@@ -19,7 +16,6 @@ const fetch_all_dependencies = async (
 ) => {
   const id = get_identifier(dependency);
 
-  //   console.log({ id, dependency });
   map.set(id, dependency);
 
   const dependencies = [
@@ -32,7 +28,8 @@ const fetch_all_dependencies = async (
 
     if (!map.has(`${name}@${version}`) && version) {
       const dependency = await get_registry_dependency(
-        { name, range: new Range(version) },
+        name,
+        version,
         true,
       );
 
@@ -45,11 +42,9 @@ const fetch_all_dependencies = async (
 
 if (import.meta.main) {
   const filename = new URL(import.meta.resolve("../fixtures/package.json"));
-  const package_content: unknown = await Deno.readTextFile(filename)
-    .catch(() => "")
-    .then(JSON.parse);
+  const dependency = await Deno.readTextFile(filename)
+    .then(JSON.parse).then(package_parser.parse);
 
-  const dependency = json_parser.parse(package_content);
   const all = await fetch_all_dependencies(dependency);
 
   console.log(all);

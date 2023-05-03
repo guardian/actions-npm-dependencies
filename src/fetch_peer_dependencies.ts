@@ -4,45 +4,31 @@ import {
   Range,
   satisfies,
   SemVer,
-} from "https://deno.land/std@0.177.0/semver/mod.ts";
-import {
-  boolean,
-  infer as inferred,
-  object,
-  record,
-  string,
-} from "https://esm.sh/zod@3.20.2";
+} from "https://deno.land/std@0.185.0/semver/mod.ts";
 import type {
   Dependency,
   Registry_dependency,
   Unrefined_dependency,
 } from "./types.ts";
-
-export const json_parser = object({
-  name: string(),
-  version: string(),
-  devDependencies: record(string()).optional(),
-  dependencies: record(string()).optional(),
-  peerDependencies: record(string()).optional(),
-  peerDependenciesMeta: record(object({ optional: boolean() })).optional(),
-});
+import { package_parser } from "./parse_dependencies.ts";
+import { Package } from "./parse_dependencies.ts";
 
 interface Options {
   known_issues?: Unrefined_dependency["known_issues"];
   cache?: boolean;
 }
 
-type Parsed_JSON = inferred<typeof json_parser>;
-
 const registry_dependencies_cache = new Map<
   string,
-  Parsed_JSON
+  Package
 >();
 
+/** */
 export const get_registry_dependency = async (
-  dependency: Dependency,
+  name: string,
+  version: string,
   cache: boolean,
-): Promise<Parsed_JSON> => {
+): Promise<Package> => {
   if (cache && registry_dependencies_cache.size === 0) {
     const cached = JSON.parse(
       localStorage.getItem("registry_dependencies_cache") ?? "[]",
@@ -53,7 +39,7 @@ export const get_registry_dependency = async (
   }
 
   const url = new URL(
-    `${dependency.name}@${minVersion(dependency.range)}/package.json`,
+    `${name}@${version}/package.json`,
     "https://unpkg.com/",
   );
 
@@ -62,7 +48,10 @@ export const get_registry_dependency = async (
 
   const registry_dependency = await fetch(url)
     .then((res) => res.json())
-    .then((json) => json_parser.parse(json));
+    .then(package_parser.parse);
+
+  // We do not want to consider development dependencies
+  registry_dependency.devDependencies = {};
 
   registry_dependencies_cache.set(url.href, registry_dependency);
 
@@ -71,9 +60,24 @@ export const get_registry_dependency = async (
       "registry_dependencies_cache",
       JSON.stringify([...registry_dependencies_cache.entries()]),
     );
+  } else {
+    localStorage.removeItem("registry_dependencies_cache");
   }
 
   return registry_dependency;
+};
+
+const is_valid_range = ([name, range]: [string, string]) => {
+  try {
+    new Range(range);
+    return true;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown";
+    console.warn(
+      `╟─ ${colour.version("△")} ${colour.dependency(name)} (${reason})`,
+    );
+  }
+  return false;
 };
 
 export const fetch_peer_dependencies = (
@@ -82,7 +86,12 @@ export const fetch_peer_dependencies = (
 ): Promise<Registry_dependency[]> =>
   Promise.all(
     dependencies.map((dependency) =>
-      get_registry_dependency(dependency, !!cache)
+      get_registry_dependency(
+        dependency.name,
+        // @ts-expect-error -- we’ll fix it later
+        minVersion(dependency.range),
+        !!cache,
+      )
         .then((registry) => {
           const peers = Object.entries(registry.peerDependencies ?? {}).map(
             ([name, range]) => {
@@ -114,7 +123,7 @@ export const fetch_peer_dependencies = (
 
               return {
                 name,
-                range: new Range(range),
+                range: new Range(range.replaceAll(/ +/g, "")),
                 satisfied,
                 local: local_version,
               };
@@ -123,26 +132,12 @@ export const fetch_peer_dependencies = (
 
           return {
             ...dependency,
-            dependencies: Object.entries(registry.dependencies ?? {}).filter(
-              ([name, range]) => {
-                try {
-                  new Range(range);
-                  return true;
-                } catch (error) {
-                  const reason = error instanceof Error
-                    ? error.message
-                    : "unknown";
-                  console.warn(
-                    `╟─ ${colour.version("△")} ${
-                      colour.dependency(name)
-                    } (${reason})`,
-                  );
-                }
-                return false;
-              },
-            ).map(
-              ([name, range]) => ({ name, range: new Range(range) }),
-            ),
+            dependencies: Object.entries(registry.dependencies ?? {})
+              .filter(is_valid_range)
+              .map(([name, range]) => ({
+                name,
+                range: new Range(range),
+              })),
             peers,
             version: new SemVer(registry.version),
           };

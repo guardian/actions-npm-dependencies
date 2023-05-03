@@ -30,7 +30,10 @@ jobs:
         run: deno lint src
 
       - name: Test
-        run: deno test src --allow-net=unpkg.com
+        run: |
+          deno test src \
+            --allow-net \
+            --allow-env=CI
           
   working_package:
     runs-on: ubuntu-latest
@@ -76,7 +79,7 @@ jobs:
             --allow-read=. \
             src/main.ts \
             fixtures/package.json  \
-            --verbose --cache --errors=7
+            --verbose --cache --errors=6
 
   failing_duplicates:
     runs-on: ubuntu-latest

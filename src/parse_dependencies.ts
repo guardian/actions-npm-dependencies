@@ -1,8 +1,8 @@
-import { object, record, string, tuple } from "https://esm.sh/zod@3.20.2";
-import { Range } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import z from "https://deno.land/x/zod@v3.21.4/index.ts";
+import { Range } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { colour } from "./colours.ts";
 import { Dependency, Unrefined_dependency } from "./types.ts";
-import { isDefined } from "./utils.ts";
+import { non_nullable } from "./utils.ts";
 
 export const find_duplicates = (dependencies: Dependency[]): string[] => {
   const seen = new Set<string>();
@@ -16,19 +16,31 @@ export const find_duplicates = (dependencies: Dependency[]): string[] => {
   return [...duplicates];
 };
 
-const package_parser = object({
-  name: string(),
-  version: string(),
-  dependencies: record(string()).optional(),
-  devDependencies: record(string()).optional(),
-  peerDependencies: record(string()).optional(),
-  known_issues: record(record(tuple([string(), string()]))).optional(),
+const dependency = z.record(z.string());
+
+const known_issues = z.record(z.record(
+  z.tuple([z.string(), z.string()]),
+)).default({});
+
+export const package_parser = z.object({
+  name: z.string(),
+  version: z.string(),
+  private: z.boolean().default(false),
+  dependencies: dependency.default({}),
+  devDependencies: dependency.default({}),
+  peerDependencies: dependency.default({}),
+  peerDependenciesMeta: z.record(z.object({ optional: z.boolean() }))
+    .default({}),
+  known_issues,
 });
+
+export type Package = z.infer<typeof package_parser>;
 
 export const parse_package_info = (contents: unknown): Unrefined_dependency => {
   const {
     name,
     version,
+    private: _private,
     dependencies = {},
     devDependencies = {},
     peerDependencies = {},
@@ -61,4 +73,4 @@ export const parse_declared_dependencies = (
       );
     }
     return undefined;
-  }).filter(isDefined).flat();
+  }).filter(non_nullable).flat();

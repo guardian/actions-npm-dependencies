@@ -1,9 +1,12 @@
-import { Range, SemVer } from  "https://deno.land/std@0.177.0/semver/mod.ts";
+import { Range, SemVer } from "https://deno.land/std@0.185.0/semver/mod.ts";
 
 export interface Dependency {
   name: string;
   range: Range;
 }
+
+export type DependencyIdentifier<T extends Dependency> =
+  `${T["name"]}@${T["range"]["raw"]}`;
 
 export interface Unrefined_dependency extends Dependency {
   dependencies: Record<string, string>;
