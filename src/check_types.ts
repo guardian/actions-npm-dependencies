@@ -19,14 +19,16 @@ export const types_matching_dependencies = (
     Package,
     "dependencies" | "devDependencies"
   >,
-) =>
-  Object.entries(devDependencies)
+) => {
+  const combined_dependencies = [
+    dependencies,
+    devDependencies,
+  ].flatMap((_) => Object.entries(_));
+
+  return combined_dependencies
     .filter(([name]) => is_type_dependency(name))
     .map(([name_typed, version_typed]) => {
-      const [name_untyped, version_untyped] = [
-        dependencies,
-        devDependencies,
-      ].flatMap((_) => Object.entries(_))
+      const [name_untyped, version_untyped] = combined_dependencies
         .find(([name_untyped]) => "@types/" + name_untyped === name_typed) ??
         [];
 
@@ -34,6 +36,7 @@ export const types_matching_dependencies = (
         ? { name_typed, name_untyped, version_typed, version_untyped }
         : undefined;
     }).filter(non_nullable);
+};
 
 const PIN_OR_TILDE = /^(~|\d)/;
 
