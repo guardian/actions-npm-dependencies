@@ -1,16 +1,17 @@
-import { minVersion } from "https://deno.land/std@0.185.0/semver/mod.ts";
+import { parse } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 import { get_registry_dependency } from "./fetch_peer_dependencies.ts";
 import { package_parser } from "./parse_dependencies.ts";
 
-type Dependency = z.infer<typeof package_parser>;
-type Identifier = `${string}@${string}`;
+export type Dependency = z.infer<typeof package_parser>;
+export type Identifier = `${string}@${string}`;
+export type Graph = Awaited<ReturnType<typeof fetch_all_dependencies>>;
 
 const get_identifier = (
   { name, version }: Dependency,
 ): Identifier => `${name}@${version}`;
 
-const fetch_all_dependencies = async (
+export const fetch_all_dependencies = async (
   dependency: Dependency,
   map = new Map<Identifier, Dependency>(),
 ) => {
@@ -24,7 +25,7 @@ const fetch_all_dependencies = async (
   ];
 
   await Promise.all(dependencies.map(async ([name, range]) => {
-    const version = minVersion(range)?.toString();
+    const version = parse(range)?.toString();
 
     if (!map.has(`${name}@${version}`) && version) {
       const dependency = await get_registry_dependency(

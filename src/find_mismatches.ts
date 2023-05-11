@@ -1,60 +1,87 @@
-import { colour, format } from "./colours.ts";
-import { Registry_dependency } from "./types.ts";
+import { colour } from "./colours.ts";
+import { Dependency, Graph } from "./package_graph.ts";
+import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
 
-export const count_unsatisfied_peer_dependencies = (
-  dependencies: Registry_dependency[],
-) =>
-  dependencies.map(({ peers }) =>
-    peers.filter((peer) => !peer.satisfied).length
-  )
-    .reduce((acc, curr) => acc + curr);
+export const get_unsatisfied_peer_dependencies = (
+  { dependencies, devDependencies }: Pick<
+    Dependency,
+    "dependencies" | "devDependencies"
+  >,
+  package_graph: Graph,
+) => {
+  const all_dependencies = { ...dependencies, ...devDependencies };
+
+  const unsatisfied: Array<
+    { name: string; local: string; required: string; from: string }
+  > = [];
+
+  for (
+    const { name: from, peerDependencies, peerDependenciesMeta }
+      of package_graph
+        .values()
+  ) {
+    for (const [name, required] of Object.entries(peerDependencies)) {
+      const is_optional = !!peerDependenciesMeta[name]?.optional;
+      const local = all_dependencies[name];
+
+      if (!local) {
+        if (!is_optional) {
+          unsatisfied.push({ name, local: "(missing)", required, from });
+        }
+        continue;
+      }
+
+      const valid = satisfies(
+        local,
+        required.replaceAll(/ +/g, ""),
+      );
+
+      if (!valid) {
+        unsatisfied.push({
+          name,
+          local,
+          required,
+          from,
+        });
+      }
+    }
+  }
+
+  return unsatisfied.sort((a, b) => a.name.localeCompare(b.name));
+};
 
 export const format_dependencies = (
-  registry_dependencies: Registry_dependency[],
-  verbose = true,
+  unsatisfied: ReturnType<typeof get_unsatisfied_peer_dependencies>,
 ): void => {
-  for (const { name, range, dependencies, peers } of registry_dependencies) {
-    const unsatisfied = peers.filter(({ satisfied }) => !satisfied);
-    if (verbose || unsatisfied.length > 0) {
-      const leg = (peers.length + dependencies.length) > 0 ? "╤" : "═";
-      console.info(`║`);
-      console.info(`╠${leg}═ ${format(name, range)}`);
-    }
+  const grouped = unsatisfied.reduce(
+    (map, { name, required, local, from }) => {
+      const found = map.get(name) ?? [];
+      found.push({ required, from, local });
+      map.set(name, found);
+      return map;
+    },
+    new Map<
+      string,
+      Array<{ required: string; from: string; local: string }>
+    >(),
+  );
 
-    let count = dependencies.length;
-    if (verbose) {
-      for (const dependency of dependencies) {
-        const angle = peers.length === 0 && --count === 0 ? "╰" : "├";
-        console.warn(
-          `║${angle}─ ${colour.version("△")} ${
-            format(dependency.name, dependency.range)
-          } – futher ${colour.file("dependencies")} not analysed`,
-        );
-      }
-    }
+  for (const [name, requirement_pairs] of grouped.entries()) {
+    console.info(`║`);
+    console.info(
+      `╠╤═ ${colour.dependency(name)} locally ${
+        colour.version(requirement_pairs[0]?.local ?? "missing")
+      }`,
+    );
 
-    count = verbose ? peers.length : unsatisfied.length;
-    for (
-      const { name, range, satisfied, local } of verbose ? peers : unsatisfied
-    ) {
+    let count = requirement_pairs.length;
+    for (const { required, from } of requirement_pairs) {
       const angle = --count === 0 ? "╰" : "├";
-      if (satisfied) {
-        if (verbose) {
-          console.info(
-            `║${angle}─ ${colour.valid("○")} ${format(name, range)}`,
-          );
-        }
-      } else {
-        const reason = local
-          ? `locally specified to ${colour.version(local.raw)}`
-          : "locally missing";
-
-        console.error(
-          `║${angle}─ ${colour.invalid("✕")} ${
-            format(name, range)
-          } – ${reason}`,
-        );
-      }
+      console.warn(
+        `║${angle}─ ${colour.invalid("✕")} ${
+          colour.version(required)
+        } required from ${colour.dependency(from)}`,
+      );
     }
   }
 };

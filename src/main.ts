@@ -4,11 +4,10 @@ import {
   parse_declared_dependencies,
   parse_package_info,
 } from "./parse_dependencies.ts";
-import { fetch_peer_dependencies } from "./fetch_peer_dependencies.ts";
 import { colour, format } from "./colours.ts";
 import {
-  count_unsatisfied_peer_dependencies,
   format_dependencies,
+  get_unsatisfied_peer_dependencies,
 } from "./find_mismatches.ts";
 import {
   get_types_in_direct_dependencies,
@@ -16,6 +15,7 @@ import {
   types_matching_dependencies,
 } from "./check_types.ts";
 import { parse } from "https://deno.land/std@0.185.0/flags/mod.ts";
+import { fetch_all_dependencies } from "./package_graph.ts";
 
 const triangle = colour.version("△");
 const cross = colour.invalid("✕");
@@ -106,24 +106,16 @@ export const package_health = async (
     }
   }
 
-  const dependencies_from_registry = await fetch_peer_dependencies(
-    dependencies_from_package,
-    {
-      known_issues,
-      cache,
-    },
+  const dependency_graph = await fetch_all_dependencies(package_info);
+
+  const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
+    package_info,
+    dependency_graph,
   );
 
-  format_dependencies(
-    dependencies_from_registry,
-    verbose,
-  );
+  format_dependencies(unsatisfied_peer_dependencies);
 
-  const number_of_mismatched_deps = count_unsatisfied_peer_dependencies(
-    dependencies_from_registry,
-  );
-
-  const problems = number_of_mismatched_deps +
+  const problems = unsatisfied_peer_dependencies.length +
     duplicates.length +
     definitely_typed_mismatches.length;
 

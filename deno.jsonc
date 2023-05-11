@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "test:dcr": "deno run -A src/cli.ts https://raw.githubusercontent.com/guardian/dotcom-rendering/mxdvl/pin-versions/dotcom-rendering/package.json --cache"
+    "test:dcr": "deno run -A src/cli.ts https://raw.githubusercontent.com/guardian/dotcom-rendering/main/dotcom-rendering/package.json --cache"
   },
   "compilerOptions": {
     "noUncheckedIndexedAccess": true,
