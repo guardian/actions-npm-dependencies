@@ -1,17 +1,14 @@
 import { package_parser } from "./parse_dependencies.ts";
 import { Package } from "./parse_dependencies.ts";
 
-interface Options {
-  known_issues?: Package["known_issues"];
-  cache?: boolean;
-}
-
 const registry_dependencies_cache = new Map<
   string,
   Package
 >();
 
-/** */
+localStorage.removeItem("registry_dependencies_cache");
+
+/** Get package.json of dependencies a given package */
 export const get_registry_dependency = async (
   name: string,
   version: string,

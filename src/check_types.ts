@@ -4,7 +4,8 @@ import {
   minVersion,
 } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { non_nullable } from "./utils.ts";
-import { Package } from "./parse_dependencies.ts";
+import { KnownIssues, Package } from "./parse_dependencies.ts";
+import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 
 const is_type_dependency = (
   dependency: string,
@@ -40,7 +41,7 @@ export const types_matching_dependencies = (
 const PIN_OR_TILDE = /^(~|\d)/;
 
 interface Options {
-  known_issues?: Package["known_issues"];
+  known_issues?: KnownIssues;
 }
 
 export const mismatches = (

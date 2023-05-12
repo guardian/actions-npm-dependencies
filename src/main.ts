@@ -1,4 +1,4 @@
-import { package_parser } from "./parse_dependencies.ts";
+import { issues_parser, package_parser } from "./parse_dependencies.ts";
 import { colour, format } from "./colours.ts";
 import {
   format_dependencies,
@@ -27,7 +27,8 @@ export const package_health = async (
   { verbose, cache }: Options,
 ): Promise<number> => {
   const package_info = package_parser.parse(package_content);
-  const { name, version, known_issues } = package_info;
+  const { name, version } = package_info;
+  const { known_issues } = issues_parser.parse(package_content);
 
   console.info(
     `╔═${"═".repeat(name.length)}╪${"═".repeat(version.length)}═╗`,
@@ -62,7 +63,9 @@ export const package_health = async (
     );
   }
 
-  get_dependencies_expressed_as_ranges(package_info);
+  const range_dependencies = Object.entries(
+    get_dependencies_expressed_as_ranges(package_info, known_issues),
+  );
 
   const duplicates = find_duplicates(package_info);
 
@@ -75,7 +78,7 @@ export const package_health = async (
 
   const definitely_typed_mismatches = mismatches(
     types_matching_dependencies(package_info),
-    package_info,
+    known_issues,
   );
 
   if (definitely_typed_mismatches.length > 0) {
@@ -102,6 +105,7 @@ export const package_health = async (
 
   const problems = unsatisfied_peer_dependencies.length +
     duplicates.length +
+    range_dependencies.length +
     definitely_typed_mismatches.length;
 
   console.info("║");
@@ -123,12 +127,13 @@ export const package_health = async (
     );
   }
 
-  if (Object.keys(known_issues).length > 0) {
+  const known_issues_array = Object.entries(known_issues);
+  if (known_issues_array.length > 0) {
     console.info("");
     console.info(
-      `${square} There are ${Object.keys(known_issues).length} known issues:`,
+      `${square} There are ${known_issues_array.length} known issues:`,
     );
-    for (const [name, issues] of Object.entries(known_issues)) {
+    for (const [name, issues] of known_issues_array) {
       console.info(`${colour.dependency(name)}`);
       for (const issue of issues) {
         console.info(

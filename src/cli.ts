@@ -5,6 +5,7 @@ import { resolve } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
   boolean: ["verbose", "cache"],
+  negatable: ["cache"],
   string: ["errors"],
   default: { errors: "0" },
 });

@@ -1,19 +1,20 @@
 import { parse } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { get_all_dependencies } from "./utils.ts";
 import { colour, format } from "./colours.ts";
-import { Package } from "./parse_dependencies.ts";
+import { KnownIssues, Package } from "./parse_dependencies.ts";
 
 export const get_dependencies_expressed_as_ranges = (
   package_info: Pick<
     Package,
-    "dependencies" | "devDependencies" | "known_issues"
+    "dependencies" | "devDependencies"
   >,
+  known_issues: KnownIssues,
 ) => {
   const dependencies_as_range: Record<string, string> = {};
   for (
     const [name, version] of get_all_dependencies(package_info)
   ) {
-    if (package_info.known_issues[`${name}@${version}`]) {
+    if (known_issues[`${name}@${version}`]) {
       console.warn(`╟─ Ignoring ${colour.dependency(name)}`);
       continue;
     }
