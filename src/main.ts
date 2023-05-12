@@ -110,6 +110,7 @@ export const package_health = async (
   const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
     package_info,
     dependency_graph,
+    { known_issues },
   );
 
   format_dependencies(unsatisfied_peer_dependencies);

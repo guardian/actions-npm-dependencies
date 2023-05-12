@@ -50,14 +50,13 @@ interface Options {
 
 export const mismatches = (
   dependencies: ReturnType<typeof types_matching_dependencies>,
-  { known_issues }: Options = {},
+  { known_issues = {} }: Options = {},
 ) =>
   dependencies.map(
     ({ name_untyped, name_typed, version_typed, version_untyped }) => {
-      const is_known_issue = !!known_issues
-        ?.[`${name_untyped}@${version_untyped}`]?.includes(
-          `${name_typed}@${version_typed}`,
-        );
+      const is_known_issue =
+        !!known_issues[`${name_untyped}@${version_untyped}`]
+          ?.includes(`${name_typed}@${version_typed}`);
 
       if (is_known_issue) return undefined;
 

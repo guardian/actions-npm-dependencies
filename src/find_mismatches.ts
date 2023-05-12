@@ -1,7 +1,14 @@
 import { colour } from "./colours.ts";
 import { Graph } from "./package_graph.ts";
 import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { Package } from "./parse_dependencies.ts";
+import { KnownIssues, Package } from "./parse_dependencies.ts";
+
+type Unsatisfied = {
+  name: string;
+  local?: string;
+  required: string;
+  from: string;
+};
 
 export const get_unsatisfied_peer_dependencies = (
   { dependencies, devDependencies }: Pick<
@@ -9,12 +16,11 @@ export const get_unsatisfied_peer_dependencies = (
     "dependencies" | "devDependencies"
   >,
   package_graph: Graph,
+  { known_issues = {} }: { known_issues?: KnownIssues } = {},
 ) => {
   const all_dependencies = { ...dependencies, ...devDependencies };
 
-  const unsatisfied: Array<
-    { name: string; local: string; required: string; from: string }
-  > = [];
+  const unsatisfied: Unsatisfied[] = [];
 
   for (
     const { name: from, peerDependencies, peerDependenciesMeta }
@@ -25,9 +31,12 @@ export const get_unsatisfied_peer_dependencies = (
       const is_optional = !!peerDependenciesMeta[name]?.optional;
       const local = all_dependencies[name];
 
+      if (known_issues[name]) continue;
+      if (known_issues[`${name}@${required}`]) continue;
+
       if (!local) {
         if (!is_optional) {
-          unsatisfied.push({ name, local: "(missing)", required, from });
+          unsatisfied.push({ name, required, from });
         }
         continue;
       }
@@ -63,7 +72,7 @@ export const format_dependencies = (
     },
     new Map<
       string,
-      Array<{ required: string; from: string; local: string }>
+      Omit<Unsatisfied, "name">[]
     >(),
   );
 
