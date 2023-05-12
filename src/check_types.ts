@@ -54,14 +54,6 @@ export const mismatches = (
 
       if (is_known_issue) return undefined;
 
-      console.log({
-        untyped,
-        typed,
-        untyped_id,
-        typed_id,
-        ki: known_issues[untyped_id],
-      });
-
       const release_difference = difference(typed.version, untyped.version);
       if (release_difference === null) return undefined;
       if (release_difference !== "patch") {
