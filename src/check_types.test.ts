@@ -66,7 +66,7 @@ Deno.test("will error on invalid major ranges", () => {
   }));
 
   assertEquals(mismatched, [
-    ["react", "major"],
+    ["react@18.1.0", "@types/react@17.1.0", "major"],
   ]);
 });
 
@@ -81,7 +81,7 @@ Deno.test("will error on invalid minor ranges", () => {
   }));
 
   assertEquals(mismatched, [
-    ["react", "minor"],
+    ["react@17.0.0", "@types/react@17.1.0", "minor"],
   ]);
 });
 

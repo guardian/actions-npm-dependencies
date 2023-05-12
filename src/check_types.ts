@@ -1,6 +1,7 @@
 import { difference } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { get_identifier, non_nullable } from "./utils.ts";
 import { KnownIssues, Package } from "./parse_dependencies.ts";
+import { format } from "./colours.ts";
 
 const is_type_dependency = (
   dependency: string,
@@ -58,7 +59,8 @@ export const mismatches = (
       if (release_difference === null) return undefined;
       if (release_difference !== "patch") {
         return [
-          untyped.name,
+          format(untyped.name, untyped.version),
+          format(typed.name, typed.version),
           release_difference,
         ] as const;
       }

@@ -7,7 +7,6 @@ import {
 import {
   get_types_in_direct_dependencies,
   mismatches,
-  to_types_package,
   types_matching_dependencies,
 } from "./check_types.ts";
 import { fetch_all_dependencies } from "./package_graph.ts";
@@ -86,12 +85,12 @@ export const package_health = async (
       `╠╤═ Mismatched ${colour.dependency("@types/*")} dependencies found!`,
     );
     let count = definitely_typed_mismatches.length;
-    for (const [name, reason] of definitely_typed_mismatches) {
+    for (const [untyped, typed, reason] of definitely_typed_mismatches) {
       const leg = --count > 0 ? "├" : "╰";
       console.error(
-        `║${leg}─ ${cross} ${colour.dependency(name)} & ${
-          colour.dependency(to_types_package(name))
-        }: ${reason}`,
+        `║${leg}─ ${cross} ${untyped} differs by ${
+          colour.invalid(reason)
+        } from ${typed}`,
       );
     }
   }
