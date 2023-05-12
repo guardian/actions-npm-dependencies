@@ -104,7 +104,7 @@ export const package_health = async (
   console.info(
     `╟─ ${square} Fetched ${
       colour.version(String(dependency_graph.size))
-    } dependencies in ${((performance.now() - start) / 1_000).toPrecision(1)}s`,
+    } dependencies in ${((performance.now() - start) / 1_000).toFixed(1)}s`,
   );
 
   const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
