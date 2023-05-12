@@ -83,11 +83,13 @@ export const package_health = async (
 
   if (definitely_typed_mismatches.length > 0) {
     console.error(
-      `╠╤ Mismatched ${colour.dependency("@types/*")} dependencies found!`,
+      `╠╤═ Mismatched ${colour.dependency("@types/*")} dependencies found!`,
     );
+    let count = definitely_typed_mismatches.length;
     for (const [name, reason] of definitely_typed_mismatches) {
+      const leg = --count > 0 ? "├" : "╰";
       console.error(
-        `║├─ ${cross} ${colour.dependency(name)} & ${
+        `║${leg}─ ${cross} ${colour.dependency(name)} & ${
           colour.dependency(to_types_package(name))
         }: ${reason}`,
       );
