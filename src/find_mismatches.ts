@@ -41,12 +41,9 @@ export const get_unsatisfied_peer_dependencies = (
         continue;
       }
 
-      const valid = satisfies(
-        local,
-        required.replaceAll(/ +/g, ""),
-      );
+      const satisfied = satisfies(local, required);
 
-      if (!valid) {
+      if (!satisfied) {
         unsatisfied.push({
           name,
           local,

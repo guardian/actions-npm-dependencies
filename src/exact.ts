@@ -1,5 +1,5 @@
 import { parse } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { get_all_dependencies } from "./utils.ts";
+import { get_all_dependencies, get_identifier } from "./utils.ts";
 import { colour, format } from "./colours.ts";
 import { KnownIssues, Package } from "./parse_dependencies.ts";
 
@@ -16,7 +16,12 @@ export const get_dependencies_expressed_as_ranges = (
   ) {
     const exact = parse(version)?.toString() === version;
     if (!exact) {
-      if (known_issues[`${name}@${version}`]) {
+      if (version === "workspace:*") {
+        console.warn(`╟─ Ignoring ${format(name, version)}`);
+        continue;
+      }
+
+      if (known_issues[get_identifier({ name, version })]) {
         console.warn(`╟─ Ignoring ${colour.dependency(name)}`);
         continue;
       }
