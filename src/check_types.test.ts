@@ -8,10 +8,10 @@ import {
 Deno.test("will not complain on types without an associated package", () => {
   const mismatches = types_matching_dependencies({
     devDependencies: {
-      "@types/node": "~18.11",
+      "@types/node": "18.11.1",
     },
     dependencies: {
-      "typescript": "^4.9",
+      "typescript": "4.9.5",
     },
   });
 
@@ -22,10 +22,10 @@ Deno.test("will find potential mismatches on types with an associated package", 
   const matched = types_matching_dependencies(
     {
       devDependencies: {
-        "@types/react": "~16.1",
+        "@types/react": "16.1.99",
       },
       dependencies: {
-        "react": "^16.1",
+        "react": "16.1.0",
       },
     },
   );
@@ -33,51 +33,20 @@ Deno.test("will find potential mismatches on types with an associated package", 
   assertEquals(matched, [
     {
       name_untyped: "react",
-      version_untyped: ("^16.1"),
+      version_untyped: ("16.1.0"),
       name_typed: "@types/react",
-      version_typed: ("~16.1"),
+      version_typed: ("16.1.99"),
     },
   ]);
 });
 
-Deno.test("will error on caret ranges", () => {
+Deno.test("will allow patch differences", () => {
   const mismatched = mismatches(types_matching_dependencies({
     devDependencies: {
-      "@types/react": "^17",
+      "@types/react": "17.0.1",
     },
     dependencies: {
-      "react": "^17.0",
-    },
-  }));
-
-  assertEquals(mismatched, [
-    ["react", "Invalid notation. Only pinned and tilde (~) ranges allowed"],
-  ]);
-});
-
-Deno.test("will error on wide ranges", () => {
-  const mismatched = mismatches(types_matching_dependencies({
-    devDependencies: {
-      "@types/react": ">=17",
-    },
-    dependencies: {
-      "react": "^17.0",
-    },
-  }));
-
-  assertEquals(mismatched, [
-    ["react", "Invalid notation. Only pinned and tilde (~) ranges allowed"],
-  ]);
-});
-
-// TODO: check that these are valid?
-Deno.test("will allow pinned versions", () => {
-  const mismatched = mismatches(types_matching_dependencies({
-    devDependencies: {
-      "@types/react": "17",
-    },
-    dependencies: {
-      "react": "17",
+      "react": "17.0.0",
     },
   }));
 
@@ -86,27 +55,27 @@ Deno.test("will allow pinned versions", () => {
 
 Deno.test("will error on invalid major ranges", () => {
   const mismatched = mismatches(types_matching_dependencies({
-    devDependencies: { "@types/react": "~17.1" },
-    dependencies: { "react": "~18.1" },
+    devDependencies: { "@types/react": "17.1.0" },
+    dependencies: { "react": "18.1.0" },
   }));
 
   assertEquals(mismatched, [
-    ["react", "Mismatching major versions"],
+    ["react", "major"],
   ]);
 });
 
 Deno.test("will error on invalid minor ranges", () => {
   const mismatched = mismatches(types_matching_dependencies({
     devDependencies: {
-      "@types/react": "17.1",
+      "@types/react": "17.1.0",
     },
     dependencies: {
-      "react": "17.0",
+      "react": "17.0.0",
     },
   }));
 
   assertEquals(mismatched, [
-    ["react", "Mismatching minor versions"],
+    ["react", "minor"],
   ]);
 });
 

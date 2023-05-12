@@ -1,8 +1,4 @@
-import {
-  major,
-  minor,
-  minVersion,
-} from "https://deno.land/std@0.185.0/semver/mod.ts";
+import { difference } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { non_nullable } from "./utils.ts";
 import { KnownIssues, Package } from "./parse_dependencies.ts";
 
@@ -42,8 +38,6 @@ export const types_matching_dependencies = (
     }).filter(non_nullable);
 };
 
-const PIN_OR_TILDE = /^(~|\d)/;
-
 interface Options {
   known_issues?: KnownIssues;
 }
@@ -60,30 +54,13 @@ export const mismatches = (
 
       if (is_known_issue) return undefined;
 
-      if (
-        !version_untyped.match(PIN_OR_TILDE) ||
-        !version_typed.match(PIN_OR_TILDE)
-      ) {
+      const release_difference = difference(version_typed, version_untyped);
+      if (release_difference === null) return undefined;
+      if (release_difference !== "patch") {
         return [
           name_untyped,
-          "Invalid notation. Only pinned and tilde (~) ranges allowed",
+          release_difference,
         ] as const;
       }
-
-      const main_min = minVersion(version_untyped);
-      const type_min = minVersion(version_typed);
-
-      if (!main_min || !type_min) {
-        return [name_untyped, "Invalid range or version types"] as const;
-      }
-
-      if (major(main_min) !== major(type_min)) {
-        return [name_untyped, "Mismatching major versions"] as const;
-      }
-      if (minor(main_min) !== minor(type_min)) {
-        return [name_untyped, "Mismatching minor versions"] as const;
-      }
-
-      return undefined;
     },
   ).filter(non_nullable);
