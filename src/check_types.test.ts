@@ -1,5 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
-import { mismatches, types_matching_dependencies } from "./check_types.ts";
+import {
+  mismatches,
+  to_types_package,
+  types_matching_dependencies,
+} from "./check_types.ts";
 
 Deno.test("will not complain on types without an associated package", () => {
   const mismatches = types_matching_dependencies({
@@ -126,4 +130,19 @@ Deno.test("will allow known errors ", () => {
   );
 
   assertEquals(mismatched, []);
+});
+
+Deno.test("handles regular packages", () => {
+  assertEquals(
+    to_types_package("qs"),
+    "@types/qs",
+  );
+});
+
+// https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master#what-about-scoped-packages
+Deno.test("handles scoped packages", () => {
+  assertEquals(
+    to_types_package("@testing-library/jest-dom"),
+    "@types/testing-library__jest-dom",
+  );
 });

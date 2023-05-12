@@ -7,6 +7,7 @@ import {
 import {
   get_types_in_direct_dependencies,
   mismatches,
+  to_types_package,
   types_matching_dependencies,
 } from "./check_types.ts";
 import { fetch_all_dependencies } from "./package_graph.ts";
@@ -87,7 +88,9 @@ export const package_health = async (
     );
     for (const [name, reason] of definitely_typed_mismatches) {
       console.error(
-        `║├─ ${cross} ${colour.dependency("@types/" + name)}: ${reason}`,
+        `║├─ ${cross} ${colour.dependency(name)} & ${
+          colour.dependency(to_types_package(name))
+        }: ${reason}`,
       );
     }
   }

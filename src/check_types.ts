@@ -5,7 +5,6 @@ import {
 } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { non_nullable } from "./utils.ts";
 import { KnownIssues, Package } from "./parse_dependencies.ts";
-import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 
 const is_type_dependency = (
   dependency: string,
@@ -13,6 +12,9 @@ const is_type_dependency = (
 
 export const get_types_in_direct_dependencies = ({ dependencies }: Package) =>
   Object.keys(dependencies).filter(is_type_dependency);
+
+export const to_types_package = (name: string) =>
+  "@types/" + name.replace(/^@([^\/]+)\//, "$1__");
 
 export const types_matching_dependencies = (
   { dependencies, devDependencies }: Pick<
@@ -29,7 +31,9 @@ export const types_matching_dependencies = (
     .filter(([name]) => is_type_dependency(name))
     .map(([name_typed, version_typed]) => {
       const [name_untyped, version_untyped] = combined_dependencies
-        .find(([name_untyped]) => "@types/" + name_untyped === name_typed) ??
+        .find(([name_untyped]) =>
+          name_typed === to_types_package(name_untyped)
+        ) ??
         [];
 
       return name_untyped && version_untyped
