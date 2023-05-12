@@ -1,14 +1,13 @@
 import { parse } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { get_registry_dependency } from "./fetch_peer_dependencies.ts";
-import { Package } from "./parse_dependencies.ts";
-import { get_all_dependencies } from "./utils.ts";
+import { type Package } from "./parse_dependencies.ts";
+import {
+  get_all_dependencies,
+  get_identifier,
+  type Identifier,
+} from "./utils.ts";
 
-export type Identifier = `${string}@${string}`;
 export type Graph = Awaited<ReturnType<typeof fetch_all_dependencies>>;
-
-const get_identifier = (
-  { name, version }: Package,
-): Identifier => `${name}@${version}`;
 
 export const fetch_all_dependencies = async (
   dependency: Package,

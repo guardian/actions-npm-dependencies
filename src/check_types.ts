@@ -1,5 +1,5 @@
 import { difference } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { non_nullable } from "./utils.ts";
+import { get_identifier, non_nullable } from "./utils.ts";
 import { KnownIssues, Package } from "./parse_dependencies.ts";
 
 const is_type_dependency = (
@@ -33,32 +33,40 @@ export const types_matching_dependencies = (
         [];
 
       return name_untyped && version_untyped
-        ? { name_typed, name_untyped, version_typed, version_untyped }
+        ? {
+          typed: { name: name_typed, version: version_typed },
+          untyped: { name: name_untyped, version: version_untyped },
+        }
         : undefined;
     }).filter(non_nullable);
 };
 
-interface Options {
-  known_issues?: KnownIssues;
-}
-
 export const mismatches = (
   dependencies: ReturnType<typeof types_matching_dependencies>,
-  { known_issues = {} }: Options = {},
+  known_issues: KnownIssues = {},
 ) =>
   dependencies.map(
-    ({ name_untyped, name_typed, version_typed, version_untyped }) => {
-      const is_known_issue =
-        !!known_issues[`${name_untyped}@${version_untyped}`]
-          ?.includes(`${name_typed}@${version_typed}`);
+    ({ typed, untyped }) => {
+      const untyped_id = get_identifier(untyped);
+      const typed_id = get_identifier(typed);
+
+      const is_known_issue = !!known_issues[untyped_id]?.includes(typed_id);
 
       if (is_known_issue) return undefined;
 
-      const release_difference = difference(version_typed, version_untyped);
+      console.log({
+        untyped,
+        typed,
+        untyped_id,
+        typed_id,
+        ki: known_issues[untyped_id],
+      });
+
+      const release_difference = difference(typed.version, untyped.version);
       if (release_difference === null) return undefined;
       if (release_difference !== "patch") {
         return [
-          name_untyped,
+          untyped.name,
           release_difference,
         ] as const;
       }

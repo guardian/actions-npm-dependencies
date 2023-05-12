@@ -32,23 +32,29 @@ Deno.test("will find potential mismatches on types with an associated package", 
 
   assertEquals(matched, [
     {
-      name_untyped: "react",
-      version_untyped: ("16.1.0"),
-      name_typed: "@types/react",
-      version_typed: ("16.1.99"),
+      untyped: {
+        name: "react",
+        version: "16.1.0",
+      },
+      typed: {
+        name: "@types/react",
+        version: "16.1.99",
+      },
     },
   ]);
 });
 
 Deno.test("will allow patch differences", () => {
-  const mismatched = mismatches(types_matching_dependencies({
-    devDependencies: {
-      "@types/react": "17.0.1",
-    },
-    dependencies: {
-      "react": "17.0.0",
-    },
-  }));
+  const mismatched = mismatches(
+    types_matching_dependencies({
+      devDependencies: {
+        "@types/react": "17.0.1",
+      },
+      dependencies: {
+        "react": "17.0.0",
+      },
+    }),
+  );
 
   assertEquals(mismatched, []);
 });
@@ -92,9 +98,7 @@ Deno.test("will allow known errors ", () => {
       },
     ),
     {
-      known_issues: {
-        "scheduler@0.23.0": ["@types/scheduler@0.16.2"],
-      },
+      "scheduler@0.23.0": ["@types/scheduler@0.16.2"],
     },
   );
 
