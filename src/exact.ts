@@ -14,13 +14,13 @@ export const get_dependencies_expressed_as_ranges = (
   for (
     const [name, version] of get_all_dependencies(package_info)
   ) {
-    if (known_issues[`${name}@${version}`]) {
-      console.warn(`╟─ Ignoring ${colour.dependency(name)}`);
-      continue;
-    }
-
     const exact = parse(version)?.toString() === version;
     if (!exact) {
+      if (known_issues[`${name}@${version}`]) {
+        console.warn(`╟─ Ignoring ${colour.dependency(name)}`);
+        continue;
+      }
+
       dependencies_as_range[name] = version;
       const formatted = format(name, version);
 
