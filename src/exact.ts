@@ -25,9 +25,17 @@ export const get_dependencies_expressed_as_ranges = (
       const formatted = format(name, version);
 
       if (version.startsWith("~")) {
-        console.error(`╟─ Do no use tilde (~) notation for ${formatted}`);
+        console.error(
+          `╟─ ${
+            colour.invalid("Do not")
+          } use tilde (~) notation for ${formatted}`,
+        );
       } else if (version.startsWith("^")) {
-        console.error(`╟─ Do no use caret (^) notation for ${formatted}`);
+        console.error(
+          `╟─ ${
+            colour.invalid("Do not")
+          } use caret (^) notation for ${formatted}`,
+        );
       } else {
         console.error(`╟─ Use a semantic version for ${formatted}`);
       }
