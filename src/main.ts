@@ -21,11 +21,10 @@ const circle = colour.valid("○");
 
 interface Options {
   verbose: boolean;
-  cache: boolean;
 }
 export const package_health = async (
   package_content: unknown,
-  { verbose, cache }: Options,
+  { verbose }: Options,
 ): Promise<number> => {
   const package_info = package_parser.parse(package_content);
   const { name, version } = package_info;
@@ -95,9 +94,16 @@ export const package_health = async (
     }
   }
 
-  const dependency_graph = await fetch_all_dependencies(package_info, {
-    cache,
-  });
+  const start = performance.now();
+
+  const dependency_graph = await fetch_all_dependencies(package_info);
+
+  console.info("║");
+  console.info(
+    `╟─ ${square} Fetched ${
+      colour.version(String(dependency_graph.size))
+    } dependencies in ${((performance.now() - start) / 1_000).toPrecision(1)}s`,
+  );
 
   const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
     package_info,

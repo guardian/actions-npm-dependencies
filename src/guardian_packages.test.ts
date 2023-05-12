@@ -18,7 +18,7 @@ Deno.test(
     fn: async () => {
       const errors = await package_health(
         await get_package("dotcom-rendering", "dotcom-rendering/package.json"),
-        { verbose: false, cache: true },
+        { verbose: false },
       );
 
       assert(errors <= 62); // let’s keep this lower!

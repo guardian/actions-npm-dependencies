@@ -3,9 +3,8 @@ import { colour } from "./colours.ts";
 import { package_health } from "./main.ts";
 import { resolve } from "https://deno.land/std@0.185.0/path/mod.ts";
 
-const { _: [package_file], verbose, cache, errors } = parse(Deno.args, {
-  boolean: ["verbose", "cache"],
-  negatable: ["cache"],
+const { _: [package_file], verbose, errors } = parse(Deno.args, {
+  boolean: ["verbose"],
   string: ["errors"],
   default: { errors: "0" },
 });
@@ -26,7 +25,7 @@ if (!package_content) {
   Deno.exit(1);
 }
 
-const problems = await package_health(package_content, { verbose, cache });
+const problems = await package_health(package_content, { verbose });
 
 if (errors !== "0" && errors === problems.toString()) {
   // Pass if the number of problems matched the --errors flag
