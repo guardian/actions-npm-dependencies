@@ -1,17 +1,13 @@
 import { Package } from "./parse_dependencies.ts";
+import { get_all_dependencies } from "./utils.ts";
 
 export const find_duplicates = (
-  { dependencies = {}, devDependencies = {} }: Package,
+  package_info: Pick<Package, "dependencies" | "devDependencies">,
 ): string[] => {
   const seen = new Set<string>();
   const duplicates = new Set<string>();
 
-  const potential_duplicates = [
-    dependencies,
-    devDependencies,
-  ].flatMap(Object.keys);
-
-  for (const name of potential_duplicates) {
+  for (const [name] of get_all_dependencies(package_info)) {
     if (seen.has(name)) duplicates.add(name);
     seen.add(name);
   }

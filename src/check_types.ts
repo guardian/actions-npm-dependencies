@@ -3,7 +3,6 @@ import {
   minor,
   minVersion,
 } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { Unrefined_dependency } from "./types.ts";
 import { non_nullable } from "./utils.ts";
 import { Package } from "./parse_dependencies.ts";
 
@@ -41,7 +40,7 @@ export const types_matching_dependencies = (
 const PIN_OR_TILDE = /^(~|\d)/;
 
 interface Options {
-  known_issues?: Unrefined_dependency["known_issues"];
+  known_issues?: Package["known_issues"];
 }
 
 export const mismatches = (
@@ -50,14 +49,12 @@ export const mismatches = (
 ) =>
   dependencies.map(
     ({ name_untyped, name_typed, version_typed, version_untyped }) => {
-      const known_issue = known_issues
-        ?.[`${name_untyped}@${version_untyped}`]
-        ?.[name_typed];
+      const is_known_issue = !!known_issues
+        ?.[`${name_untyped}@${version_untyped}`]?.includes(
+          `${name_typed}@${version_typed}`,
+        );
 
-      if (known_issue) {
-        const [from, to] = known_issue;
-        if (from === version_typed && to === version_untyped) return undefined;
-      }
+      if (is_known_issue) return undefined;
 
       if (
         !version_untyped.match(PIN_OR_TILDE) ||

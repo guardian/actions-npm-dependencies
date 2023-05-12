@@ -1,9 +1,4 @@
-import {
-  find_duplicates,
-  package_parser,
-  parse_declared_dependencies,
-  parse_package_info,
-} from "./parse_dependencies.ts";
+import { package_parser } from "./parse_dependencies.ts";
 import { colour, format } from "./colours.ts";
 import {
   format_dependencies,
@@ -14,8 +9,9 @@ import {
   mismatches,
   types_matching_dependencies,
 } from "./check_types.ts";
-import { parse } from "https://deno.land/std@0.185.0/flags/mod.ts";
 import { fetch_all_dependencies } from "./package_graph.ts";
+import { get_dependencies_expressed_as_ranges } from "./exact.ts";
+import { find_duplicates } from "./duplicates.ts";
 
 const triangle = colour.version("△");
 const cross = colour.invalid("✕");
@@ -30,16 +26,15 @@ export const package_health = async (
   package_content: unknown,
   { verbose, cache }: Options,
 ): Promise<number> => {
-  const { name, range, dependencies, devDependencies, known_issues } =
-    parse_package_info(package_content);
   const package_info = package_parser.parse(package_content);
+  const { name, version, known_issues } = package_info;
 
   console.info(
-    `╔═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╗`,
+    `╔═${"═".repeat(name.length)}╪${"═".repeat(version.length)}═╗`,
   );
-  console.info(`╫ ${format(name, range)} ╫`);
+  console.info(`╫ ${format(name, version)} ╫`);
   console.info(
-    `╠═${"═".repeat(name.length)}╪${"═".repeat(range.range.length)}═╝`,
+    `╠═${"═".repeat(name.length)}╪${"═".repeat(version.length)}═╝`,
   );
 
   const type = package_info.private ? "app" : "lib";
@@ -67,21 +62,9 @@ export const package_health = async (
     );
   }
 
-  const dependencies_from_package = parse_declared_dependencies(
-    [
-      dependencies,
-      devDependencies,
-    ].flatMap(Object.entries),
-  );
+  get_dependencies_expressed_as_ranges(package_info);
 
-  if (dependencies_from_package.length === 0) {
-    if (verbose) {
-      console.info("╰─ You have no dependencies and therefore no issues!");
-    }
-    return 0;
-  }
-
-  const duplicates = find_duplicates(dependencies_from_package);
+  const duplicates = find_duplicates(package_info);
 
   if (duplicates.length > 0) {
     console.error(`╠╤ Duplicate dependencies found!`);
@@ -92,7 +75,7 @@ export const package_health = async (
 
   const definitely_typed_mismatches = mismatches(
     types_matching_dependencies(package_info),
-    { known_issues },
+    package_info,
   );
 
   if (definitely_typed_mismatches.length > 0) {
@@ -106,7 +89,9 @@ export const package_health = async (
     }
   }
 
-  const dependency_graph = await fetch_all_dependencies(package_info);
+  const dependency_graph = await fetch_all_dependencies(package_info, {
+    cache,
+  });
 
   const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
     package_info,
@@ -145,12 +130,9 @@ export const package_health = async (
     );
     for (const [name, issues] of Object.entries(known_issues)) {
       console.info(`${colour.dependency(name)}`);
-      for (const [dependency, [from, to]] of Object.entries(issues)) {
+      for (const issue of issues) {
         console.info(
-          `${square} Substituted ${colour.dependency(dependency)}@${
-            colour.version(to)
-          }`,
-          `(specified @${colour.version(from)})`,
+          `${square} Substituted ${issue}`,
         );
       }
     }
@@ -160,42 +142,3 @@ export const package_health = async (
 
   return problems;
 };
-
-if (import.meta.main) {
-  const { _: [package_file], verbose, cache, errors: expected_errors } = parse(
-    Deno.args,
-    {
-      boolean: ["verbose", "cache"],
-      negatable: ["cache"],
-      default: { errors: 0 },
-    },
-  );
-
-  if (typeof package_file !== "string") {
-    console.error("🚨 No package.json passed as argument");
-    Deno.exit(1);
-  }
-
-  const filename = Deno.cwd() + "/" + package_file;
-
-  const package_content: unknown = await Deno.readTextFile(filename)
-    .catch(() => "").then(JSON.parse);
-
-  if (!package_content) {
-    console.error("🚨 No package.json found at", colour.file(filename));
-    Deno.exit(1);
-  }
-
-  const errors = await package_health(package_content, { verbose, cache });
-
-  if (typeof expected_errors !== "number" || errors != expected_errors) {
-    Deno.exit(errors);
-  } else {
-    console.info(
-      "(Expected exactly",
-      expected_errors,
-      "errors – exiting gracefully)",
-    );
-    Deno.exit();
-  }
-}

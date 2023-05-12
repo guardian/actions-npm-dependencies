@@ -56,8 +56,8 @@ Deno.test("Fails on invalid range", () => {
     unsatisfied_peer_dependencies,
     [
       { name: "one", local: "1.2.3", required: "~1.1.1", from: "mock" },
-      { name: "three", local: "3.6.9", required: "^3.6.10", from: "mock" },
       { name: "two", local: "2.4.6", required: "^1.2.2", from: "mock" },
+      { name: "three", local: "3.6.9", required: "^3.6.10", from: "mock" },
     ],
   );
 });

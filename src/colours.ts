@@ -6,7 +6,6 @@ import {
   underline,
   yellow,
 } from "https://deno.land/std@0.185.0/fmt/colors.ts";
-import { Range } from "https://deno.land/std@0.185.0/semver/mod.ts";
 
 export const colour = {
   dependency: cyan,
@@ -17,9 +16,9 @@ export const colour = {
   invalid: red,
 };
 
-export const format = (name: string, range: Range) =>
+export const format = (name: string, version: string) =>
   [
     colour.dependency(name),
     colour.subdued("@"),
-    colour.version(range.raw),
+    colour.version(version),
   ].join("");

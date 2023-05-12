@@ -94,10 +94,10 @@ Deno.test("will error on invalid major ranges", () => {
 Deno.test("will error on invalid minor ranges", () => {
   const mismatched = mismatches(types_matching_dependencies({
     devDependencies: {
-      "@types/react": "~17.1",
+      "@types/react": "17.1",
     },
     dependencies: {
-      "react": "~17.0",
+      "react": "17.0",
     },
   }));
 
@@ -111,18 +111,16 @@ Deno.test("will allow known errors ", () => {
     types_matching_dependencies(
       {
         devDependencies: {
-          "@types/scheduler": "~0.16.2",
+          "@types/scheduler": "0.16.2",
         },
         dependencies: {
-          "scheduler": "~0.23.0",
+          "scheduler": "0.23.0",
         },
       },
     ),
     {
       known_issues: {
-        "scheduler@~0.23.0": {
-          "@types/scheduler": ["~0.16.2", "~0.23.0"],
-        },
+        "scheduler@0.23.0": ["@types/scheduler@0.16.2"],
       },
     },
   );

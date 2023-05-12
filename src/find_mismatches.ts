@@ -1,10 +1,11 @@
 import { colour } from "./colours.ts";
-import { Dependency, Graph } from "./package_graph.ts";
+import { Graph } from "./package_graph.ts";
 import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
+import { Package } from "./parse_dependencies.ts";
 
 export const get_unsatisfied_peer_dependencies = (
   { dependencies, devDependencies }: Pick<
-    Dependency,
+    Package,
     "dependencies" | "devDependencies"
   >,
   package_graph: Graph,
@@ -47,7 +48,7 @@ export const get_unsatisfied_peer_dependencies = (
     }
   }
 
-  return unsatisfied.sort((a, b) => a.name.localeCompare(b.name));
+  return unsatisfied;
 };
 
 export const format_dependencies = (
