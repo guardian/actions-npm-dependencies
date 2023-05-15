@@ -1,5 +1,5 @@
 import { format } from "./colours.ts";
-import { package_parser } from "./parse_dependencies.ts";
+import { package_parser } from "./parser.ts";
 
 const cache = await caches.open("package-health");
 

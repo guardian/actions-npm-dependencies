@@ -1,11 +1,11 @@
-import { issues_parser, package_parser } from "./parse_dependencies.ts";
+import { issues_parser, package_parser } from "./parser.ts";
 import { colour, format } from "./colours.ts";
 import {
   format_dependencies,
   get_unsatisfied_peer_dependencies,
-} from "./find_mismatches.ts";
-import { get_types_in_direct_dependencies, mismatches } from "./check_types.ts";
-import { fetch_all_dependencies } from "./package_graph.ts";
+} from "./peer_dependencies.ts";
+import { get_types_in_direct_dependencies, mismatches } from "./types.ts";
+import { fetch_all_dependencies } from "./graph.ts";
 import { get_dependencies_expressed_as_ranges } from "./exact.ts";
 import { find_duplicates } from "./duplicates.ts";
 

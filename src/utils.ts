@@ -1,4 +1,4 @@
-import { Package } from "./parse_dependencies.ts";
+import { Package } from "./parser.ts";
 
 export type Identifier = `${string}@${string}`;
 

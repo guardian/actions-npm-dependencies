@@ -7,7 +7,7 @@ import {
   non_nullable,
 } from "./utils.ts";
 import { colour, format } from "./colours.ts";
-import { KnownIssues } from "./parse_dependencies.ts";
+import { KnownIssues } from "./parser.ts";
 
 /**
  * Given development and direct dependencies, identify which

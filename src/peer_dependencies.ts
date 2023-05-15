@@ -1,7 +1,8 @@
 import { colour } from "./colours.ts";
-import { Graph } from "./package_graph.ts";
+import { Graph } from "./graph.ts";
 import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { KnownIssues, Package } from "./parse_dependencies.ts";
+import { KnownIssues, Package, package_parser } from "./parser.ts";
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
 
 type Unsatisfied = {
   name: string;
@@ -56,6 +57,67 @@ export const get_unsatisfied_peer_dependencies = (
 
   return unsatisfied;
 };
+
+Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
+  await test.step("works when all dependencies are matched", () => {
+    const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
+      {
+        dependencies: {
+          "one": "1.2.3",
+          "two": "2.4.6",
+        },
+        devDependencies: { "three": "3.6.9" },
+      },
+      new Map([
+        ["peer@0.1.1", {
+          ...package_parser.parse({
+            name: "mock",
+            version: "0.0.0",
+            private: false,
+          }),
+          peerDependencies: { "one": "^1", two: "~2.4.4" },
+        }],
+      ]),
+    );
+
+    assertEquals(unsatisfied_peer_dependencies, []);
+  });
+
+  await test.step("fails on invalid range", () => {
+    const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
+      {
+        dependencies: {
+          "one": "1.2.3",
+          "two": "2.4.6",
+        },
+        devDependencies: { "three": "3.6.9" },
+      },
+      new Map([
+        ["peer@0.1.1", {
+          ...package_parser.parse({
+            name: "mock",
+            version: "0.0.0",
+            private: false,
+          }),
+          peerDependencies: {
+            "one": "~1.1.1",
+            "two": "^1.2.2",
+            "three": "^3.6.10",
+          },
+        }],
+      ]),
+    );
+
+    assertEquals(
+      unsatisfied_peer_dependencies,
+      [
+        { name: "one", local: "1.2.3", required: "~1.1.1", from: "mock" },
+        { name: "two", local: "2.4.6", required: "^1.2.2", from: "mock" },
+        { name: "three", local: "3.6.9", required: "^3.6.10", from: "mock" },
+      ],
+    );
+  });
+});
 
 export const format_dependencies = (
   unsatisfied: ReturnType<typeof get_unsatisfied_peer_dependencies>,
