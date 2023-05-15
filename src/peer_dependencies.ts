@@ -193,6 +193,7 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
 
 export const format_dependencies_issues = (
   unsatisfied: Issues,
+  verbose = true,
 ): void => {
   const grouped = unsatisfied.reduce(
     (map, issue) => {
@@ -207,21 +208,20 @@ export const format_dependencies_issues = (
     >(),
   );
 
-  for (const [name, requirement_pairs] of grouped.entries()) {
-    console.info(`║`);
-    console.info(
-      `╠╤═ ${colour.dependency(name)} locally ${
-        colour.version(requirement_pairs[0]?.version ?? "missing")
-      }`,
+  for (const [name, issues] of grouped.entries()) {
+    const [first_issue] = issues;
+    verbose && console.info(`║`);
+    verbose && console.info(
+      `╠╤═ local dependency ${first_issue?.message ?? colour.dependency(name)}`,
     );
 
-    let count = requirement_pairs.length;
-    for (const { message, from } of requirement_pairs) {
+    let count = issues.length;
+    for (const { from, version } of issues) {
       const angle = --count === 0 ? "╰" : "├";
-      console.warn(
-        `║${angle}─ ${colour.invalid("✕")} ${message} required from ${
-          colour.dependency(from ?? "--")
-        }`,
+      verbose && console.warn(
+        `║${angle}─ ${colour.invalid("✕")} ${
+          format(name, version)
+        } required from ${colour.dependency(from ?? "--")}`,
       );
     }
   }

@@ -143,10 +143,12 @@ export const package_health = async (
       `${square} There are ${known_issues_array.length} known issues:`,
     );
     for (const [name, issues] of known_issues_array) {
-      console.info(`${colour.dependency(name)}`);
+      console.info(`╤ ${colour.dependency(name)}`);
+      let count = issues.length;
       for (const issue of issues) {
+        const leg = --count > 0 ? "├" : "╰";
         console.info(
-          `${square} Substituted ${issue}`,
+          `${leg} ${square} Substituted ${issue}`,
         );
       }
     }
