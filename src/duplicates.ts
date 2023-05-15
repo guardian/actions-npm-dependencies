@@ -11,12 +11,13 @@ export const find_duplicates = (
   package_info: Parameters<typeof get_all_dependencies>[0],
 ): Issues => {
   const seen = new Set<string>();
-  const duplicates = new Set<string>();
+  const duplicates = new Map<string, string>();
 
-  for (const [name] of get_all_dependencies(package_info)) {
-    if (seen.has(name)) duplicates.add(name);
+  for (const [name, version] of get_all_dependencies(package_info)) {
+    if (seen.has(name)) duplicates.set(name, version);
     seen.add(name);
   }
 
-  return [...duplicates].map((name) => ({ severity: "error", name }));
+  return [...duplicates.entries()]
+    .map(([name, version]) => ({ severity: "error", name, version }));
 };

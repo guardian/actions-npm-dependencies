@@ -5,7 +5,7 @@ export type Identifier = `${string}@${string}`;
 export type Issue = {
   severity: "info" | "warn" | "error";
   name: string;
-  version?: string;
+  version: string;
   from?: string;
 };
 export type Issues = Issue[];
