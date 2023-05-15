@@ -1,4 +1,7 @@
+import { format } from "./colours.ts";
 import { package_parser } from "./parse_dependencies.ts";
+
+const cache = await caches.open("package-health");
 
 /** Get package.json of dependencies a given package */
 export const get_registry_dependency = async (
@@ -10,8 +13,16 @@ export const get_registry_dependency = async (
     "https://unpkg.com/",
   );
 
-  const registry_dependency = await fetch(url)
-    .then((res) => res.json())
+  const interval = setInterval(() => {
+    console.info(`║ Taking a while to download ${format(name, version)}`);
+  }, 120);
+
+  const found = await cache.match(url);
+  const response = found ?? await fetch(url);
+
+  if (!found) cache.put(url, response.clone());
+
+  const registry_dependency = await response.json()
     .then(package_parser.parse);
 
   // We do not want to consider further
@@ -19,6 +30,8 @@ export const get_registry_dependency = async (
 
   // We do not want to consider development dependencies
   registry_dependency.devDependencies = {};
+
+  clearInterval(interval);
 
   return registry_dependency;
 };
