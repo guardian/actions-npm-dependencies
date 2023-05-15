@@ -11,12 +11,16 @@ import { format } from "./colours.ts";
 import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
 
 const is_type_dependency = (
-  dependency: string,
-): dependency is `@types/${string}` => dependency.startsWith("@types/");
+  dependency: [string, string],
+): dependency is [`@types/${string}`, string] =>
+  dependency[0].startsWith("@types/");
 
 export const get_types_in_direct_dependencies = (
   { dependencies }: Pick<Package, "dependencies">,
-) => Object.keys(dependencies).filter(is_type_dependency);
+): Issues =>
+  Object.entries(dependencies)
+    .filter(is_type_dependency)
+    .map(([name, version]) => ({ severity: "warn", name, version }));
 
 Deno.test("get_types_in_direct_dependencies", () => {
   assertEquals(
@@ -25,7 +29,7 @@ Deno.test("get_types_in_direct_dependencies", () => {
         "@types/one": "1.0.0",
       },
     }),
-    ["@types/one"],
+    [{ severity: "warn", name: "@types/one", version: "1.0.0" }],
   );
 });
 
@@ -53,7 +57,7 @@ const types_matching_dependencies = (
   const all_dependencies = get_all_dependencies(package_info);
 
   return all_dependencies
-    .filter(([name]) => is_type_dependency(name))
+    .filter(is_type_dependency)
     .map(([name_typed, version_typed]) => {
       const [name_untyped, version_untyped] = all_dependencies
         .find(([name_untyped]) =>
