@@ -1,9 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
-import { Package } from "./parse_dependencies.ts";
 import { find_duplicates } from "./duplicates.ts";
+import type { get_all_dependencies } from "./utils.ts";
 
 Deno.test("Warns on duplicate dependencies", () => {
-  const package_info: Pick<Package, "dependencies" | "devDependencies"> = {
+  const package_info: Parameters<typeof get_all_dependencies>[0] = {
     dependencies: {
       "one": "1.0.0",
       "two": "2.0.0",
@@ -11,8 +11,9 @@ Deno.test("Warns on duplicate dependencies", () => {
     devDependencies: {
       "two": "2.2.2",
     },
+    optionalDependencies: {},
   };
   const duplicates = find_duplicates(package_info);
 
-  assertEquals(duplicates, ["two"]);
+  assertEquals(duplicates, [{ severity: "error", name: "two" }]);
 });

@@ -2,10 +2,10 @@ import { Package } from "./parse_dependencies.ts";
 
 export type Identifier = `${string}@${string}`;
 
-type Issue = {
+export type Issue = {
   severity: "info" | "warn" | "error";
   name: string;
-  version: string;
+  version?: string;
   from?: string;
 };
 export type Issues = Issue[];
@@ -18,10 +18,10 @@ export const non_nullable = <T>(_: T): _ is NonNullable<T> =>
   typeof _ !== "undefined";
 
 export const get_all_dependencies = (
-  { dependencies, devDependencies }: Pick<
+  { dependencies, devDependencies, optionalDependencies }: Pick<
     Package,
-    "dependencies" | "devDependencies"
+    "dependencies" | "devDependencies" | "optionalDependencies"
   >,
 ) =>
-  [dependencies, devDependencies]
+  [dependencies, devDependencies, optionalDependencies]
     .flatMap((dependency) => Object.entries(dependency));

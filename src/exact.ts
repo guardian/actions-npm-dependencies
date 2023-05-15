@@ -4,10 +4,7 @@ import { colour, format } from "./colours.ts";
 import { KnownIssues, Package } from "./parse_dependencies.ts";
 
 export const get_dependencies_expressed_as_ranges = (
-  package_info: Pick<
-    Package,
-    "dependencies" | "devDependencies"
-  >,
+  package_info: Parameters<typeof get_all_dependencies>[0],
   known_issues: KnownIssues,
 ) => {
   const dependencies_as_range: Record<string, string> = {};

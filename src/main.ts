@@ -70,7 +70,7 @@ export const package_health = async (
 
   if (duplicates.length > 0) {
     console.error(`╠╤ Duplicate dependencies found!`);
-    for (const name of duplicates) {
+    for (const { name } of duplicates) {
       console.error(`║╰─ ${cross} ${colour.dependency(name)}`);
     }
   }

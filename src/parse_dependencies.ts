@@ -1,6 +1,6 @@
 import z from "https://deno.land/x/zod@v3.21.4/index.ts";
 
-const dependency = z.record(z.string());
+const dependency = z.record(z.string()).default({});
 
 export type KnownIssues = z.infer<typeof issues_parser>["known_issues"];
 export const issues_parser = z.object({
@@ -19,9 +19,10 @@ const app = z.object({
 
 const common = z.object({
   name: z.string(),
-  dependencies: dependency.default({}),
-  devDependencies: dependency.default({}),
-  peerDependencies: dependency.default({}),
+  dependencies: dependency,
+  devDependencies: dependency,
+  optionalDependencies: dependency,
+  peerDependencies: dependency,
   peerDependenciesMeta: z.record(z.object({ optional: z.boolean() }))
     .default({}),
 });
