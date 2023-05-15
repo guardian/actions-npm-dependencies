@@ -1,7 +1,7 @@
 {
   "tasks": {
     "test:dcr": "deno run -A src/cli.ts https://raw.githubusercontent.com/guardian/dotcom-rendering/main/dotcom-rendering/package.json --cache",
-    "coverage": "deno test -A --coverage=coverage"
+    "coverage": "rm -rf coverage && deno test -A --coverage=coverage && deno coverage coverage"
   },
   "compilerOptions": {
     "noUncheckedIndexedAccess": true,

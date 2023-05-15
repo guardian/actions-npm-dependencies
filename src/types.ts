@@ -14,8 +14,20 @@ const is_type_dependency = (
   dependency: string,
 ): dependency is `@types/${string}` => dependency.startsWith("@types/");
 
-export const get_types_in_direct_dependencies = ({ dependencies }: Package) =>
-  Object.keys(dependencies).filter(is_type_dependency);
+export const get_types_in_direct_dependencies = (
+  { dependencies }: Pick<Package, "dependencies">,
+) => Object.keys(dependencies).filter(is_type_dependency);
+
+Deno.test("get_types_in_direct_dependencies", () => {
+  assertEquals(
+    get_types_in_direct_dependencies({
+      dependencies: {
+        "@types/one": "1.0.0",
+      },
+    }),
+    ["@types/one"],
+  );
+});
 
 const to_types_package = (name: string) =>
   "@types/" + name.replace(/^@([^\/]+)\//, "$1__");
@@ -98,8 +110,7 @@ export const mismatches = (
       if (is_known_issue) return undefined;
 
       const release_difference = difference(typed.version, untyped.version);
-      if (release_difference === null) return undefined;
-      if (release_difference !== "patch") {
+      if (release_difference === "major" || release_difference === "minor") {
         return {
           severity: "error",
           ...untyped,
@@ -110,60 +121,62 @@ export const mismatches = (
     },
   ).filter(non_nullable);
 
-Deno.test("will allow patch differences", () => {
-  const mismatched = mismatches({
-    devDependencies: {
-      "@types/react": "17.0.1",
-    },
-    dependencies: {
-      "react": "17.0.0",
-    },
-    optionalDependencies: {},
+Deno.test("mismatches", async (test) => {
+  await test.step("will allow patch differences", () => {
+    const mismatched = mismatches({
+      devDependencies: {
+        "@types/react": "17.0.1",
+      },
+      dependencies: {
+        "react": "17.0.0",
+      },
+      optionalDependencies: {},
+    });
+
+    assertEquals(mismatched, []);
   });
 
-  assertEquals(mismatched, []);
-});
+  await test.step("will error on invalid major ranges", () => {
+    const mismatched = mismatches({
+      devDependencies: { "@types/react": "17.1.0" },
+      dependencies: { "react": "18.1.0" },
+      optionalDependencies: {},
+    });
 
-Deno.test("will error on invalid major ranges", () => {
-  const mismatched = mismatches({
-    devDependencies: { "@types/react": "17.1.0" },
-    dependencies: { "react": "18.1.0" },
-    optionalDependencies: {},
+    assertEquals(mismatched, [{
+      severity: "error",
+      name: "react",
+      version: "18.1.0",
+      from: format("@types/react", "17.1.0"),
+      message: "major",
+    }]);
   });
 
-  assertEquals(mismatched, [{
-    severity: "error",
-    name: "react",
-    version: "18.1.0",
-    from: format("@types/react", "17.1.0"),
-    message: "major",
-  }]);
-});
+  await test.step("will error on invalid minor ranges", () => {
+    const mismatched = mismatches({
+      devDependencies: { "@types/react": "17.1.0" },
+      dependencies: { "react": "17.0.0" },
+      optionalDependencies: {},
+    });
 
-Deno.test("will error on invalid minor ranges", () => {
-  const mismatched = mismatches({
-    devDependencies: { "@types/react": "17.1.0" },
-    dependencies: { "react": "17.0.0" },
-    optionalDependencies: {},
+    assertEquals(mismatched, [{
+      severity: "error",
+      name: "react",
+      version: "17.0.0",
+      from: format("@types/react", "17.1.0"),
+      message: "minor",
+    }]);
   });
 
-  assertEquals(mismatched, [{
-    severity: "error",
-    name: "react",
-    version: "17.0.0",
-    from: format("@types/react", "17.1.0"),
-    message: "minor",
-  }]);
-});
+  await test.step("will allow known errors ", () => {
+    const mismatched = mismatches({
+      devDependencies: { "@types/scheduler": "0.16.2" },
+      dependencies: { "scheduler": "0.23.0" },
+      optionalDependencies: {},
+    }, {
+      "scheduler@0.23.0": ["@types/scheduler@0.16.2"],
+    });
 
-Deno.test("will allow known errors ", () => {
-  const mismatched = mismatches({
-    devDependencies: { "@types/scheduler": "0.16.2" },
-    dependencies: { "scheduler": "0.23.0" },
-    optionalDependencies: {},
-  }, {
-    "scheduler@0.23.0": ["@types/scheduler@0.16.2"],
+    assertEquals(mismatched, []);
   });
-
-  assertEquals(mismatched, []);
 });

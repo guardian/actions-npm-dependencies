@@ -69,18 +69,76 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
         devDependencies: { "three": "3.6.9" },
       },
       new Map([
-        ["peer@0.1.1", {
-          ...package_parser.parse({
-            name: "mock",
-            version: "0.0.0",
+        [
+          "one@1.2.3",
+          package_parser.parse({
+            name: "one",
+            version: "1.2.3",
             private: false,
+            peerDependencies: { "one": "^1", two: "~2.4.4" },
           }),
-          peerDependencies: { "one": "^1", two: "~2.4.4" },
-        }],
+        ],
       ]),
     );
 
     assertEquals(unsatisfied_peer_dependencies, []);
+  });
+
+  await test.step("handles optional dependencies gracefully", () => {
+    const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
+      {
+        dependencies: { "one": "1.2.3" },
+        devDependencies: {},
+      },
+      new Map([
+        [
+          "one@1.2.3",
+          package_parser.parse({
+            name: "one",
+            version: "1.2.3",
+            peerDependencies: {
+              "two": "^2",
+            },
+            peerDependenciesMeta: {
+              "two": { optional: true },
+            },
+          }),
+        ],
+      ]),
+    );
+
+    assertEquals(unsatisfied_peer_dependencies, []);
+  });
+
+  await test.step("fails on missing dependency", () => {
+    const unsatisfied_peer_dependencies = get_unsatisfied_peer_dependencies(
+      {
+        dependencies: {
+          "one": "1.2.3",
+        },
+        devDependencies: {},
+      },
+      new Map([
+        [
+          "one@1.2.3",
+          package_parser.parse({
+            name: "one",
+            version: "1.2.3",
+            private: false,
+            peerDependencies: {
+              "peer": "0.0.1",
+            },
+          }),
+        ],
+      ]),
+    );
+
+    assertEquals(
+      unsatisfied_peer_dependencies,
+      [
+        { name: "peer", required: "0.0.1", from: "one" },
+      ],
+    );
   });
 
   await test.step("fails on invalid range", () => {
@@ -93,18 +151,19 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
         devDependencies: { "three": "3.6.9" },
       },
       new Map([
-        ["peer@0.1.1", {
-          ...package_parser.parse({
+        [
+          "peer@0.1.1",
+          package_parser.parse({
             name: "mock",
             version: "0.0.0",
             private: false,
+            peerDependencies: {
+              "one": "~1.1.1",
+              "two": "^1.2.2",
+              "three": "^3.6.10",
+            },
           }),
-          peerDependencies: {
-            "one": "~1.1.1",
-            "two": "^1.2.2",
-            "three": "^3.6.10",
-          },
-        }],
+        ],
       ]),
     );
 

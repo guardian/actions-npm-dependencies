@@ -1,3 +1,4 @@
+import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
 import { get_all_dependencies, Issues } from "./utils.ts";
 
 /**
@@ -21,3 +22,25 @@ export const find_duplicates = (
   return [...duplicates.entries()]
     .map(([name, version]) => ({ severity: "error", name, version }));
 };
+
+Deno.test("find_duplicates", async (test) => {
+  await test.step("Warns on duplicate dependencies", () => {
+    const package_info: Parameters<typeof get_all_dependencies>[0] = {
+      dependencies: {
+        "one": "1.0.0",
+        "two": "2.0.0",
+      },
+      devDependencies: {
+        "two": "2.2.2",
+      },
+      optionalDependencies: {},
+    };
+    const duplicates = find_duplicates(package_info);
+
+    assertEquals(duplicates, [{
+      severity: "error",
+      name: "two",
+      version: "2.2.2",
+    }]);
+  });
+});
