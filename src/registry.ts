@@ -14,7 +14,11 @@ export const get_registry_dependency = async (
   );
 
   const interval = setInterval(() => {
-    console.info(`║ Taking a while to download ${format(name, version)}`);
+    console.info(
+      `║ Taking a while to fetch information for ${
+        format(name, version)
+      }, ${url}`,
+    );
   }, 120);
 
   const found = await cache.match(url);
