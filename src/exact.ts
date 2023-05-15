@@ -16,6 +16,7 @@ export const get_dependencies_expressed_as_ranges = (
   ) {
     const exact = parse(version)?.toString() === version;
     if (!exact) {
+      // @TODO: handle PNPM workspaces
       if (version === "workspace:*") {
         console.warn(`╟─ Ignoring ${format(name, version)}`);
         continue;
