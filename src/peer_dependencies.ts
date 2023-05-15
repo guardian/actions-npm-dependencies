@@ -1,8 +1,9 @@
-import { colour } from "./colours.ts";
+import { colour, format } from "./colours.ts";
 import { Graph } from "./graph.ts";
 import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { KnownIssues, Package, package_parser } from "./parser.ts";
 import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { get_identifier, Issue, Issues } from "./utils.ts";
 
 type Unsatisfied = {
   name: string;
@@ -18,38 +19,39 @@ export const get_unsatisfied_peer_dependencies = (
   >,
   package_graph: Graph,
   { known_issues = {} }: { known_issues?: KnownIssues } = {},
-) => {
+): Issues => {
   const all_dependencies = { ...dependencies, ...devDependencies };
 
-  const unsatisfied: Unsatisfied[] = [];
+  const unsatisfied: Issues = [];
 
   for (
     const { name: from, peerDependencies, peerDependenciesMeta }
       of package_graph
         .values()
   ) {
-    for (const [name, required] of Object.entries(peerDependencies)) {
+    for (const [name, version] of Object.entries(peerDependencies)) {
       const is_optional = !!peerDependenciesMeta[name]?.optional;
       const local = all_dependencies[name];
 
-      if (known_issues[name]) continue;
-      if (known_issues[`${name}@${required}`]) continue;
-
       if (!local) {
         if (!is_optional) {
-          unsatisfied.push({ name, required, from });
+          const severity = known_issues[name] ? "warn" : "error";
+          unsatisfied.push({ severity, name, version, from });
         }
         continue;
       }
 
-      const satisfied = satisfies(local, required);
-
+      const satisfied = satisfies(local, version);
       if (!satisfied) {
+        const severity = known_issues[get_identifier({ name, version })]
+          ? "warn"
+          : "error";
         unsatisfied.push({
+          severity,
           name,
-          local,
-          required,
+          version,
           from,
+          message: format(name, local),
         });
       }
     }
@@ -136,7 +138,7 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
     assertEquals(
       unsatisfied_peer_dependencies,
       [
-        { name: "peer", required: "0.0.1", from: "one" },
+        { severity: "error", name: "peer", version: "0.0.1", from: "one" },
       ],
     );
   });
@@ -170,27 +172,45 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
     assertEquals(
       unsatisfied_peer_dependencies,
       [
-        { name: "one", local: "1.2.3", required: "~1.1.1", from: "mock" },
-        { name: "two", local: "2.4.6", required: "^1.2.2", from: "mock" },
-        { name: "three", local: "3.6.9", required: "^3.6.10", from: "mock" },
+        {
+          severity: "error",
+          name: "one",
+          version: "~1.1.1",
+          from: "mock",
+          message: format("one", "1.2.3"),
+        },
+        {
+          severity: "error",
+          name: "two",
+          version: "^1.2.2",
+          from: "mock",
+          message: format("two", "2.4.6"),
+        },
+        {
+          severity: "error",
+          name: "three",
+          version: "^3.6.10",
+          from: "mock",
+          message: format("three", "3.6.9"),
+        },
       ],
     );
   });
 });
 
-export const format_dependencies = (
-  unsatisfied: ReturnType<typeof get_unsatisfied_peer_dependencies>,
+export const format_dependencies_issues = (
+  unsatisfied: Issues,
 ): void => {
   const grouped = unsatisfied.reduce(
-    (map, { name, required, local, from }) => {
-      const found = map.get(name) ?? [];
-      found.push({ required, from, local });
-      map.set(name, found);
+    (map, issue) => {
+      const found = map.get(issue.name) ?? [];
+      found.push(issue);
+      map.set(issue.name, found);
       return map;
     },
     new Map<
       string,
-      Omit<Unsatisfied, "name">[]
+      Issues
     >(),
   );
 
@@ -198,17 +218,17 @@ export const format_dependencies = (
     console.info(`║`);
     console.info(
       `╠╤═ ${colour.dependency(name)} locally ${
-        colour.version(requirement_pairs[0]?.local ?? "missing")
+        colour.version(requirement_pairs[0]?.version ?? "missing")
       }`,
     );
 
     let count = requirement_pairs.length;
-    for (const { required, from } of requirement_pairs) {
+    for (const { message, from } of requirement_pairs) {
       const angle = --count === 0 ? "╰" : "├";
       console.warn(
-        `║${angle}─ ${colour.invalid("✕")} ${
-          colour.version(required)
-        } required from ${colour.dependency(from)}`,
+        `║${angle}─ ${colour.invalid("✕")} ${message} required from ${
+          colour.dependency(from ?? "--")
+        }`,
       );
     }
   }

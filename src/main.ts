@@ -1,7 +1,7 @@
 import { issues_parser, package_parser } from "./parser.ts";
 import { colour, format } from "./colours.ts";
 import {
-  format_dependencies,
+  format_dependencies_issues,
   get_unsatisfied_peer_dependencies,
 } from "./peer_dependencies.ts";
 import { get_types_in_direct_dependencies, mismatches } from "./types.ts";
@@ -110,7 +110,7 @@ export const package_health = async (
     { known_issues },
   );
 
-  format_dependencies(unsatisfied_peer_dependencies);
+  format_dependencies_issues(unsatisfied_peer_dependencies);
 
   const problems = unsatisfied_peer_dependencies.length +
     duplicates.length +
