@@ -2,6 +2,14 @@ import { Package } from "./parse_dependencies.ts";
 
 export type Identifier = `${string}@${string}`;
 
+type Issue = {
+  severity: "info" | "warn" | "error";
+  name: string;
+  version: string;
+  from?: string;
+};
+export type Issues = Issue[];
+
 export const get_identifier = (
   { name, version }: Pick<Package, "name" | "version">,
 ): Identifier => `${name}@${version}`;
