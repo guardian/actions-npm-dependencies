@@ -3,14 +3,7 @@ import { Graph } from "./graph.ts";
 import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { KnownIssues, Package, package_parser } from "./parser.ts";
 import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
-import { get_identifier, Issue, Issues } from "./utils.ts";
-
-type Unsatisfied = {
-  name: string;
-  local?: string;
-  required: string;
-  from: string;
-};
+import { get_identifier, Issues } from "./utils.ts";
 
 export const get_unsatisfied_peer_dependencies = (
   { dependencies, devDependencies }: Pick<
