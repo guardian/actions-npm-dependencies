@@ -7,6 +7,7 @@ const mock_dependency = {
   private: false,
   dependencies: {},
   devDependencies: {},
+  optionalDependencies: {},
   peerDependenciesMeta: {},
   known_issues: {},
 };

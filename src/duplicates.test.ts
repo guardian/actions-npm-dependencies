@@ -15,5 +15,9 @@ Deno.test("Warns on duplicate dependencies", () => {
   };
   const duplicates = find_duplicates(package_info);
 
-  assertEquals(duplicates, [{ severity: "error", name: "two" }]);
+  assertEquals(duplicates, [{
+    severity: "error",
+    name: "two",
+    version: "2.2.2",
+  }]);
 });

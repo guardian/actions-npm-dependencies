@@ -7,6 +7,7 @@ export type Issue = {
   name: string;
   version: string;
   from?: string;
+  message?: string;
 };
 export type Issues = Issue[];
 

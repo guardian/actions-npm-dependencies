@@ -4,11 +4,7 @@ import {
   format_dependencies,
   get_unsatisfied_peer_dependencies,
 } from "./find_mismatches.ts";
-import {
-  get_types_in_direct_dependencies,
-  mismatches,
-  types_matching_dependencies,
-} from "./check_types.ts";
+import { get_types_in_direct_dependencies, mismatches } from "./check_types.ts";
 import { fetch_all_dependencies } from "./package_graph.ts";
 import { get_dependencies_expressed_as_ranges } from "./exact.ts";
 import { find_duplicates } from "./duplicates.ts";
@@ -76,7 +72,7 @@ export const package_health = async (
   }
 
   const definitely_typed_mismatches = mismatches(
-    types_matching_dependencies(package_info),
+    package_info,
     known_issues,
   );
 
@@ -85,12 +81,14 @@ export const package_health = async (
       `╠╤═ Mismatched ${colour.dependency("@types/*")} dependencies found!`,
     );
     let count = definitely_typed_mismatches.length;
-    for (const [untyped, typed, reason] of definitely_typed_mismatches) {
+    for (
+      const { name, version, from, message } of definitely_typed_mismatches
+    ) {
       const leg = --count > 0 ? "├" : "╰";
       console.error(
-        `║${leg}─ ${cross} ${untyped} differs by ${
-          colour.invalid(reason)
-        } from ${typed}`,
+        `║${leg}─ ${cross} ${format(name, version)} differs by ${
+          colour.invalid(message ?? "unknown")
+        } from ${from}`,
       );
     }
   }
