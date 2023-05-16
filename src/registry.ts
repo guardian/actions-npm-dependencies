@@ -24,9 +24,9 @@ export const get_registry_dependency = async (
   const found = await cache.match(url);
   const response = found ?? await fetch(url);
 
-  if (!found) cache.put(url, response.clone());
+  if (!found) await cache.put(url, response);
 
-  const registry_dependency = await response.json()
+  const registry_dependency = await response.clone().json()
     .then(package_parser.parse);
 
   // We do not want to consider further
