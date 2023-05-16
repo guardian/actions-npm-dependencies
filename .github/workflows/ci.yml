@@ -31,5 +31,6 @@ jobs:
       - name: Test
         run: |
           deno test src \
+            --allow-read=fixtures \
             --allow-net=unpkg.com \
             --allow-env=CI
