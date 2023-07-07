@@ -49,7 +49,7 @@ export const get_dependencies_expressed_as_ranges = (
             } use caret (^) notation for ${formatted}`,
           );
         } else {
-          console.error(`╟─ Use a semantic version for ${formatted}`);
+          console.error(`╟─ Use a exact version (X.Y.Z) for ${formatted}`);
         }
 
         return { severity: "error", name, version };
