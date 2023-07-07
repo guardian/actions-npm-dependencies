@@ -122,27 +122,27 @@ export const package_health = async (
 
   format_dependencies_issues(unsatisfied_peer_dependencies);
 
-  const problems = unsatisfied_peer_dependencies.length +
-    duplicates.length +
-    range_dependencies.length +
-    definitely_typed_mismatches.length;
+  const errors = unsatisfied_peer_dependencies
+    .concat(duplicates).concat(range_dependencies)
+    .concat(definitely_typed_mismatches)
+    .filter(({ severity }) => severity === "error").length;
 
   console.info("║");
   console.info("╙───────────────────────────────────");
 
-  if (problems === 0) {
+  if (errors === 0) {
     if (verbose) {
       console.info(`${circle} Dependencies are in good shape`);
     }
-  } else if (problems === 1) {
+  } else if (errors === 1) {
     console.error(
       `${cross} There is ${colour.invalid("1")} dependencies problem`,
     );
   } else {
     console.error(
       `${cross} There are ${
-        colour.invalid(String(problems))
-      } dependencies problems`,
+        colour.invalid(String(errors))
+      } dependencies errors`,
     );
   }
 
@@ -166,5 +166,5 @@ export const package_health = async (
 
   console.info("────────────────────────────────────");
 
-  return problems;
+  return errors;
 };
