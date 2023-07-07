@@ -58,9 +58,19 @@ export const package_health = async (
     );
   }
 
-  const range_dependencies = Object.entries(
-    get_dependencies_expressed_as_ranges(package_info, known_issues),
+  const range_dependencies = get_dependencies_expressed_as_ranges(
+    package_info,
+    known_issues,
   );
+
+  if (range_dependencies.some(({ severity }) => severity === "error")) {
+    console.info([
+      "║",
+      "╠═ If you have inexact dependencies which do not specify a patch version–i.e. not matching X.Y.Z",
+      "║  you can run the ./yarn.ts script to get the exact versions from your lockfile!",
+      "║",
+    ].join("\n"));
+  }
 
   const duplicates = find_duplicates(package_info);
 

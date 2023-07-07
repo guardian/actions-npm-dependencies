@@ -38,5 +38,21 @@
     "https://deno.land/x/zod@v3.21.4/index.ts": "d27aabd973613985574bc31f39e45cb5d856aa122ef094a9f38a463b8ef1a268",
     "https://deno.land/x/zod@v3.21.4/locales/en.ts": "a7a25cd23563ccb5e0eed214d9b31846305ddbcdb9c5c8f508b108943366ab4c",
     "https://deno.land/x/zod@v3.21.4/types.ts": "b5d061babea250de14fc63764df5b3afa24f2b088a1d797fc060ba49a0ddff28"
+  },
+  "npm": {
+    "specifiers": {
+      "@types/yarnpkg__lockfile": "@types/yarnpkg__lockfile@1.1.6",
+      "@yarnpkg/lockfile": "@yarnpkg/lockfile@1.1.0"
+    },
+    "packages": {
+      "@types/yarnpkg__lockfile@1.1.6": {
+        "integrity": "sha512-kbdQa3J+hVCkqmGQm31fthEwGxszZtepw84p9QGCiJB7TmiPqPAf3/g9eZUnkCeanmiFOaG4pVhiPDyqJxaoaw==",
+        "dependencies": {}
+      },
+      "@yarnpkg/lockfile@1.1.0": {
+        "integrity": "sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==",
+        "dependencies": {}
+      }
+    }
   }
 }
