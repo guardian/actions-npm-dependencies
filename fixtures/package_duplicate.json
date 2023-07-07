@@ -1,11 +1,11 @@
 {
   "name": "npm-dependencies-duplicate",
-  "version": "0.0.2",
+  "private": true,
   "dependencies": {
     "@guardian/source-foundations": "8.0.0",
-    "@guardian/libs": "^12"
+    "@guardian/libs": "12.0.0"
   },
   "devDependencies": {
-    "@guardian/libs": "^12"
+    "@guardian/libs": "12.0.0"
   }
 }

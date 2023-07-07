@@ -1,17 +1,17 @@
 {
   "name": "npm-dependencies",
-  "version": "0.0.1",
+  "private": true,
   "dependencies": {
     "@guardian/ab-core": "2.0.0",
     "@guardian/core-web-vitals": "2.0.2",
     "@guardian/source-foundations": "8.0.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "tslib": "^2.4.1",
-    "web-vitals": "^2.0.1"
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "tslib": "2.4.1",
+    "web-vitals": "2.0.1"
   },
   "devDependencies": {
-    "@guardian/libs": "^12",
-    "@guardian/ab-react": "^2.0.1"
+    "@guardian/libs": "12.0.0",
+    "@guardian/ab-react": "2.0.1"
   }
 }

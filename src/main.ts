@@ -1,15 +1,11 @@
-import { issues_parser, package_parser } from "./parse_dependencies.ts";
+import { issues_parser, package_parser } from "./parser.ts";
 import { colour, format } from "./colours.ts";
 import {
-  format_dependencies,
+  format_dependencies_issues,
   get_unsatisfied_peer_dependencies,
-} from "./find_mismatches.ts";
-import {
-  get_types_in_direct_dependencies,
-  mismatches,
-  types_matching_dependencies,
-} from "./check_types.ts";
-import { fetch_all_dependencies } from "./package_graph.ts";
+} from "./peer_dependencies.ts";
+import { get_types_in_direct_dependencies, mismatches } from "./types.ts";
+import { fetch_all_dependencies } from "./graph.ts";
 import { get_dependencies_expressed_as_ranges } from "./exact.ts";
 import { find_duplicates } from "./duplicates.ts";
 
@@ -62,21 +58,31 @@ export const package_health = async (
     );
   }
 
-  const range_dependencies = Object.entries(
-    get_dependencies_expressed_as_ranges(package_info, known_issues),
+  const range_dependencies = get_dependencies_expressed_as_ranges(
+    package_info,
+    known_issues,
   );
+
+  if (range_dependencies.some(({ severity }) => severity === "error")) {
+    console.info([
+      "║",
+      "╠═ If you have inexact dependencies which do not specify a patch version–i.e. not matching X.Y.Z",
+      "║  you can run the ./yarn.ts script to get the exact versions from your lockfile!",
+      "║",
+    ].join("\n"));
+  }
 
   const duplicates = find_duplicates(package_info);
 
   if (duplicates.length > 0) {
     console.error(`╠╤ Duplicate dependencies found!`);
-    for (const name of duplicates) {
+    for (const { name } of duplicates) {
       console.error(`║╰─ ${cross} ${colour.dependency(name)}`);
     }
   }
 
   const definitely_typed_mismatches = mismatches(
-    types_matching_dependencies(package_info),
+    package_info,
     known_issues,
   );
 
@@ -85,12 +91,14 @@ export const package_health = async (
       `╠╤═ Mismatched ${colour.dependency("@types/*")} dependencies found!`,
     );
     let count = definitely_typed_mismatches.length;
-    for (const [untyped, typed, reason] of definitely_typed_mismatches) {
+    for (
+      const { name, version, from, message } of definitely_typed_mismatches
+    ) {
       const leg = --count > 0 ? "├" : "╰";
       console.error(
-        `║${leg}─ ${cross} ${untyped} differs by ${
-          colour.invalid(reason)
-        } from ${typed}`,
+        `║${leg}─ ${cross} ${format(name, version)} differs by ${
+          colour.invalid(message ?? "unknown")
+        } from ${from}`,
       );
     }
   }
@@ -112,7 +120,7 @@ export const package_health = async (
     { known_issues },
   );
 
-  format_dependencies(unsatisfied_peer_dependencies);
+  format_dependencies_issues(unsatisfied_peer_dependencies);
 
   const problems = unsatisfied_peer_dependencies.length +
     duplicates.length +
@@ -145,10 +153,12 @@ export const package_health = async (
       `${square} There are ${known_issues_array.length} known issues:`,
     );
     for (const [name, issues] of known_issues_array) {
-      console.info(`${colour.dependency(name)}`);
+      console.info(`╤ ${colour.dependency(name)}`);
+      let count = issues.length;
       for (const issue of issues) {
+        const leg = --count > 0 ? "├" : "╰";
         console.info(
-          `${square} Substituted ${issue}`,
+          `${leg} ${square} Substituted ${issue}`,
         );
       }
     }

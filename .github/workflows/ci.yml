@@ -3,7 +3,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-
 env:
   DENO_DIR: ./cache
 
@@ -15,13 +14,13 @@ jobs:
 
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.x
+          deno-version: v1.33.x
 
       - name: Cache Deno dependencies 
         uses: actions/cache@v3
         with:
           path: ${{ env.DENO_DIR }}
-          key: ${{ hashFiles('lock.json') }}
+          key: ${{ hashFiles('deno.lock') }}
       
       - name: Format
         run: deno fmt src --check
@@ -32,74 +31,6 @@ jobs:
       - name: Test
         run: |
           deno test src \
-            --allow-net \
+            --allow-read=fixtures \
+            --allow-net=cdn.jsdelivr.net,raw.githubusercontent.com \
             --allow-env=CI
-          
-  working_package:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Cache Deno dependencies 
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.DENO_DIR }}
-          key: ${{ hashFiles('lock.json') }}
-      
-      - run: |
-          deno run \
-            --allow-net=unpkg.com \
-            --allow-read=. \
-            src/main.ts \
-            fixtures/package_valid.json  \
-            --verbose --cache
-  
-  failing_peer:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Cache Deno dependencies 
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.DENO_DIR }}
-          key: ${{ hashFiles('lock.json') }}
-
-      - run: |
-          deno run \
-            --allow-net=unpkg.com \
-            --allow-read=. \
-            src/main.ts \
-            fixtures/package.json  \
-            --verbose --cache --errors=6
-
-  failing_duplicates:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Cache Deno dependencies 
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.DENO_DIR }}
-          key: ${{ hashFiles('lock.json') }}
-
-      - run: |
-          deno run \
-            --allow-net=unpkg.com \
-            --allow-read=. \
-            src/main.ts \
-            fixtures/package_duplicate.json  \
-            --verbose --cache --errors=3

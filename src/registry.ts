@@ -1,4 +1,8 @@
-import { package_parser } from "./parse_dependencies.ts";
+import { fetchJSON } from "./json.ts";
+import { package_parser } from "./parser.ts";
+import PQueue from "https://deno.land/x/p_queue@1.0.1/mod.ts";
+
+const queue = new PQueue({ concurrency: 24 });
 
 /** Get package.json of dependencies a given package */
 export const get_registry_dependency = async (
@@ -6,13 +10,13 @@ export const get_registry_dependency = async (
   version: string,
 ) => {
   const url = new URL(
-    `${name}@${version}/package.json`,
-    "https://unpkg.com/",
+    `/npm/${name}@${version}/package.json`,
+    "https://cdn.jsdelivr.net/",
   );
 
-  const registry_dependency = await fetch(url)
-    .then((res) => res.json())
-    .then(package_parser.parse);
+  const registry_dependency = await queue.add(() =>
+    fetchJSON(url, { parser: package_parser.parse })
+  );
 
   // We do not want to consider further
   registry_dependency.dependencies = {};

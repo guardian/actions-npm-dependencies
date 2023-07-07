@@ -1,6 +1,6 @@
 import { parse } from "https://deno.land/std@0.185.0/semver/mod.ts";
-import { get_registry_dependency } from "./fetch_peer_dependencies.ts";
-import { type Package } from "./parse_dependencies.ts";
+import { get_registry_dependency } from "./registry.ts";
+import { type Package } from "./parser.ts";
 import {
   get_all_dependencies,
   get_identifier,
