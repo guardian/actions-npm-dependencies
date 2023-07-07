@@ -1,9 +1,11 @@
 import { colour, format } from "./colours.ts";
 import { Graph } from "./graph.ts";
-import { satisfies } from "https://deno.land/std@0.185.0/semver/mod.ts";
 import { KnownIssues, Package, package_parser } from "./parser.ts";
-import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { testRange } from "https://deno.land/std@0.193.0/semver/test_range.ts";
+import { assertEquals } from "https://deno.land/std@0.193.0/testing/asserts.ts";
 import { get_identifier, Issues } from "./utils.ts";
+import { parseRange } from "https://deno.land/std@0.193.0/semver/mod.ts";
+import { tryParse } from "https://deno.land/std@0.193.0/semver/try_parse.ts";
 
 export const get_unsatisfied_peer_dependencies = (
   { dependencies, devDependencies }: Pick<
@@ -24,7 +26,7 @@ export const get_unsatisfied_peer_dependencies = (
   ) {
     for (const [name, version] of Object.entries(peerDependencies)) {
       const is_optional = !!peerDependenciesMeta[name]?.optional;
-      const local = all_dependencies[name];
+      const local = tryParse(all_dependencies[name]);
 
       if (!local) {
         if (!is_optional) {
@@ -34,7 +36,7 @@ export const get_unsatisfied_peer_dependencies = (
         continue;
       }
 
-      const satisfied = satisfies(local, version);
+      const satisfied = testRange(local, parseRange(version));
       if (!satisfied) {
         const severity = known_issues[get_identifier({ name, version })]
           ? "warn"

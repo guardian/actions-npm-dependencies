@@ -1,4 +1,4 @@
-import { difference } from "https://deno.land/std@0.185.0/semver/mod.ts";
+import { difference } from "https://deno.land/std@0.193.0/semver/mod.ts";
 import {
   get_all_dependencies,
   get_identifier,

@@ -6,6 +6,8 @@ import {
   underline,
   yellow,
 } from "https://deno.land/std@0.185.0/fmt/colors.ts";
+import { SemVer } from "https://deno.land/std@0.193.0/semver/types.ts";
+import { format as formatSemVer } from "https://deno.land/std@0.193.0/semver/format.ts";
 
 export const colour = {
   dependency: cyan,
@@ -16,9 +18,11 @@ export const colour = {
   invalid: red,
 };
 
-export const format = (name: string, version: string) =>
+export const format = (name: string, version: string | SemVer) =>
   [
     colour.dependency(name),
     colour.subdued("@"),
-    colour.version(version),
+    colour.version(
+      typeof version === "string" ? version : formatSemVer(version),
+    ),
   ].join("");
