@@ -1,5 +1,6 @@
 {
   "tasks": {
+    "npm:publish": "deno run -A src/dnt.ts && cd npm && npm publish",
     "test:dcr": "deno run -A src/cli.ts https://raw.githubusercontent.com/guardian/dotcom-rendering/main/dotcom-rendering/package.json --cache",
     "coverage": "rm -rf coverage && deno test -A --coverage=coverage && deno coverage coverage"
   },
