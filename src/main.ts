@@ -43,6 +43,7 @@ export const package_health = async (
   console.info("║");
 
   const types_in_direct_dependencies = get_types_in_direct_dependencies(
+    type,
     package_info,
   );
 
@@ -123,6 +124,7 @@ export const package_health = async (
   format_dependencies_issues(unsatisfied_peer_dependencies);
 
   const errors = unsatisfied_peer_dependencies
+    .concat(types_in_direct_dependencies)
     .concat(duplicates).concat(range_dependencies)
     .concat(definitely_typed_mismatches)
     .filter(({ severity }) => severity === "error").length;

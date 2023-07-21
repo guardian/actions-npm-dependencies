@@ -16,20 +16,29 @@ const is_type_dependency = (
   dependency[0].startsWith("@types/");
 
 export const get_types_in_direct_dependencies = (
+  type: "app" | "lib",
   { dependencies }: Pick<Package, "dependencies">,
 ): Issues =>
   Object.entries(dependencies)
     .filter(is_type_dependency)
-    .map(([name, version]) => ({ severity: "warn", name, version }));
+    .map(([name, version]) => ({
+      severity: type === "app" ? "warn" : "error",
+      name,
+      version,
+    }));
 
 Deno.test("get_types_in_direct_dependencies", () => {
   assertEquals(
-    get_types_in_direct_dependencies({
+    get_types_in_direct_dependencies("app", {
       dependencies: {
         "@types/one": "1.0.0",
       },
     }),
-    [{ severity: "warn", name: "@types/one", version: "1.0.0" }],
+    [{
+      severity: "warn",
+      name: "@types/one",
+      version: "1.0.0",
+    }],
   );
 });
 
