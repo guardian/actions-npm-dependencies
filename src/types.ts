@@ -1,4 +1,4 @@
-import { difference } from "https://deno.land/std@0.193.0/semver/mod.ts";
+import { difference } from "https://deno.land/std@0.198.0/semver/mod.ts";
 import {
   get_all_dependencies,
   get_identifier,
@@ -8,7 +8,7 @@ import {
 } from "./utils.ts";
 import { KnownIssues, Package } from "./parser.ts";
 import { format } from "./colours.ts";
-import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 
 const is_type_dependency = (
   dependency: [string, string],

@@ -5,8 +5,8 @@ import {
   get_identifier,
   type Identifier,
 } from "./utils.ts";
-import { tryParse } from "https://deno.land/std@0.193.0/semver/try_parse.ts";
-import { format } from "https://deno.land/std@0.193.0/semver/format.ts";
+import { tryParse } from "https://deno.land/std@0.198.0/semver/try_parse.ts";
+import { format } from "https://deno.land/std@0.198.0/semver/format.ts";
 
 export type Graph = Awaited<ReturnType<typeof fetch_all_dependencies>>;
 

@@ -2,7 +2,7 @@
 import { build, emptyDir } from "https://deno.land/x/dnt@0.38.0/mod.ts";
 import { tag } from "./get_git_tag.ts";
 import { package_health } from "./main.ts";
-import { resolve } from "https://deno.land/std@0.185.0/path/mod.ts";
+import { resolve } from "https://deno.land/std@0.198.0/path/mod.ts";
 
 const dir = "./npm";
 
@@ -47,6 +47,6 @@ const package_contents = await Deno.readTextFile(resolve(dir + "/package.json"))
   .then(
     JSON.parse,
   );
-const problems = await package_health(package_contents, { verbose: false });
+const { errors } = await package_health(package_contents, { verbose: false });
 
-Deno.exit(problems === 0 ? 0 : 1);
+Deno.exit(errors === 0 ? 0 : 1);

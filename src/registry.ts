@@ -1,4 +1,4 @@
-import { format, SemVer } from "https://deno.land/std@0.193.0/semver/mod.ts";
+import { format, SemVer } from "https://deno.land/std@0.198.0/semver/mod.ts";
 import { fetchJSON } from "./json.ts";
 import { registry_package_parser } from "./parser.ts";
 import PQueue from "https://deno.land/x/p_queue@1.0.1/mod.ts";

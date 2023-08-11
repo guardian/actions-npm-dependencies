@@ -19,7 +19,15 @@ const app = z.object({
   private: z.literal(true),
 });
 
+export const npm = z.object({
+  name: z.string(),
+  version: z.string(),
+  private: z.literal(false).default(false),
+});
+
 const common = z.object({
+  description: z.string().optional(),
+  license: z.string().optional(),
   scripts: z.record(z.string()).optional(),
   dependencies: dependency,
   devDependencies: dependency,
@@ -35,8 +43,4 @@ export const package_parser = z.discriminatedUnion("private", [
   app.merge(common).passthrough(),
 ]);
 
-export const registry_package_parser = z.object({
-  name: z.string(),
-  version: z.string(),
-  private: z.literal(false).default(false),
-}).merge(common);
+export const registry_package_parser = npm.merge(common);

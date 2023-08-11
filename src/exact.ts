@@ -1,13 +1,58 @@
-import { parse } from "https://deno.land/std@0.185.0/semver/mod.ts";
+import { parse } from "https://deno.land/std@0.198.0/semver/mod.ts";
 import {
   get_all_dependencies,
   get_identifier,
   Issue,
   Issues,
-  non_nullable,
 } from "./utils.ts";
 import { colour, format } from "./colours.ts";
 import { KnownIssues } from "./parser.ts";
+import { fetchJSON } from "./json.ts";
+import { npm } from "./parser.ts";
+import { ZodError } from "https://deno.land/x/zod@v3.21.4/index.ts";
+
+const isExactVersion = (version: string) => {
+  try {
+    parse(version);
+    return true;
+  } catch (error) {
+    if (error instanceof TypeError) return false;
+    throw error;
+  }
+};
+
+export const make_exact = async (
+  dependencies?: Record<string, string>,
+): Promise<Record<string, string> | undefined> => {
+  if (!dependencies) return undefined;
+
+  const exact = await Promise.all(
+    Object.entries(dependencies).map(async (
+      [name, specifier],
+    ) => {
+      if (isExactVersion(specifier)) return [name, specifier] as const;
+
+      const url =
+        `https://data.jsdelivr.com/v1/packages/npm/${name}/resolved?specifier=${specifier}`;
+
+      try {
+        const { version } = await fetchJSON(url, { parser: npm.parse });
+
+        console.info(
+          `Found exact version ${format(name, version)} matching ${
+            colour.version(specifier)
+          }`,
+        );
+        return [name, version] as const;
+      } catch (error) {
+        if (error instanceof ZodError) return [name, specifier] as const;
+        throw error;
+      }
+    }),
+  );
+
+  return Object.fromEntries(exact);
+};
 
 /**
  * Given development and direct dependencies, identify which
@@ -17,42 +62,24 @@ import { KnownIssues } from "./parser.ts";
  */
 export const get_dependencies_expressed_as_ranges = (
   package_info: Parameters<typeof get_all_dependencies>[0],
-  known_issues: NonNullable<KnownIssues>,
 ): Issues =>
-  get_all_dependencies(package_info).map(
-    ([name, version]): Issue | undefined => {
-      const exact = parse(version)?.toString() === version;
-      if (!exact) {
+  get_all_dependencies(package_info).flatMap<Issue>(
+    ([name, version]) => {
+      if (isExactVersion(version)) return [];
+
+      const formatted = format(name, version);
+
+      if (
         // @TODO: handle PNPM workspaces
-        if (version === "workspace:*") {
-          console.warn(`╟─ Ignoring ${format(name, version)}`);
-          return { severity: "warn", name, version };
-        }
-
-        if (known_issues[get_identifier({ name, version })]) {
-          console.warn(`╟─ Ignoring ${colour.dependency(name)}`);
-          return { severity: "warn", name, version };
-        }
-
-        const formatted = format(name, version);
-
-        if (version.startsWith("~")) {
-          console.error(
-            `╟─ ${
-              colour.invalid("Do not")
-            } use tilde (~) notation for ${formatted}`,
-          );
-        } else if (version.startsWith("^")) {
-          console.error(
-            `╟─ ${
-              colour.invalid("Do not")
-            } use caret (^) notation for ${formatted}`,
-          );
-        } else {
-          console.error(`╟─ Use a exact version (X.Y.Z) for ${formatted}`);
-        }
-
-        return { severity: "error", name, version };
+        version === "workspace:*" ||
+        version.startsWith("https://github.com/")
+      ) {
+        console.warn(`╟─ Ignoring ${formatted}`);
+        return { severity: "warn", name, version };
       }
+
+      console.error(`╟─ Use a exact version (X.Y.Z) for ${formatted}`);
+
+      return { severity: "error", name, version };
     },
-  ).filter(non_nullable);
+  );

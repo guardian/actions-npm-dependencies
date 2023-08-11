@@ -6,7 +6,7 @@ import {
 } from "./peer_dependencies.ts";
 import { get_types_in_direct_dependencies, mismatches } from "./types.ts";
 import { fetch_all_dependencies } from "./graph.ts";
-import { get_dependencies_expressed_as_ranges } from "./exact.ts";
+import { get_dependencies_expressed_as_ranges, make_exact } from "./exact.ts";
 import { find_duplicates } from "./duplicates.ts";
 import { isObject } from "https://esm.sh/@guardian/libs@15.6.1";
 
@@ -57,10 +57,17 @@ export const package_health = async (
     return { errors: 1 };
   }
 
-  const package_info = maybe_package_info.data;
+  const package_info = {
+    ...maybe_package_info.data,
+    dependencies: await make_exact(maybe_package_info.data.dependencies),
+    devDependencies: await make_exact(maybe_package_info.data.devDependencies),
+    optionalDependencies: await make_exact(
+      maybe_package_info.data.optionalDependencies,
+    ),
+  };
 
   const { name, version } = package_info;
-  const { known_issues } = issues_parser.parse(package_content);
+  const { known_issues = {} } = issues_parser.parse(package_content);
 
   console.info(
     `╔═${"═".repeat(name.length)}╪${"═".repeat(version.length)}═╗`,
@@ -98,7 +105,6 @@ export const package_health = async (
 
   const range_dependencies = get_dependencies_expressed_as_ranges(
     package_info,
-    known_issues ?? {},
   );
 
   if (range_dependencies.some(({ severity }) => severity === "error")) {
@@ -204,6 +210,9 @@ export const package_health = async (
   }
 
   console.info("────────────────────────────────────");
+
+  // @ts-expect-error -- we’re cool
+  package_info["known_issues"] = known_issues;
 
   return { errors, package_info };
 };
