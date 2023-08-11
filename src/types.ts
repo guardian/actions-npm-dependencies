@@ -19,7 +19,7 @@ export const get_types_in_direct_dependencies = (
   type: "app" | "lib",
   { dependencies }: Pick<Package, "dependencies">,
 ): Issues =>
-  Object.entries(dependencies)
+  Object.entries(dependencies ?? {})
     .filter(is_type_dependency)
     .map(([name, version]) => ({
       severity: type === "app" ? "warn" : "error",

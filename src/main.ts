@@ -1,4 +1,4 @@
-import { issues_parser, package_parser } from "./parser.ts";
+import { issues_parser, Package, package_parser } from "./parser.ts";
 import { colour, format } from "./colours.ts";
 import {
   format_dependencies_issues,
@@ -8,6 +8,7 @@ import { get_types_in_direct_dependencies, mismatches } from "./types.ts";
 import { fetch_all_dependencies } from "./graph.ts";
 import { get_dependencies_expressed_as_ranges } from "./exact.ts";
 import { find_duplicates } from "./duplicates.ts";
+import { isObject } from "https://esm.sh/@guardian/libs@15.6.1";
 
 const triangle = colour.version("△");
 const cross = colour.invalid("✕");
@@ -20,8 +21,44 @@ interface Options {
 export const package_health = async (
   package_content: unknown,
   { verbose }: Options,
-): Promise<number> => {
-  const package_info = package_parser.parse(package_content);
+): Promise<{ errors: number; package_info?: Package }> => {
+  const maybe_package_info = package_parser.safeParse(
+    package_content,
+  );
+
+  if (!maybe_package_info.success) {
+    if (isObject(package_content)) {
+      console.warn("Trying to fix your package.json file for you");
+      if (
+        maybe_package_info.error.issues.some(({ message }) =>
+          message === "Invalid discriminator value. Expected false | true"
+        )
+      ) {
+        console.warn(
+          `"private" should be a boolean, we set it to true`,
+          `see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#private`,
+        );
+
+        let type = prompt("Is this a “lib” or an ”app”?");
+        if (!["lib", "app"].includes(type ?? "")) {
+          console.warn("Invalid input:", type, "– assuming app (private)");
+          type = "app";
+        }
+
+        const new_package_json = {
+          ...package_content,
+          private: type === "lib" ? false : true,
+        };
+
+        return package_health(new_package_json, { verbose });
+      }
+    }
+
+    return { errors: 1 };
+  }
+
+  const package_info = maybe_package_info.data;
+
   const { name, version } = package_info;
   const { known_issues } = issues_parser.parse(package_content);
 
@@ -61,7 +98,7 @@ export const package_health = async (
 
   const range_dependencies = get_dependencies_expressed_as_ranges(
     package_info,
-    known_issues,
+    known_issues ?? {},
   );
 
   if (range_dependencies.some(({ severity }) => severity === "error")) {
@@ -148,7 +185,7 @@ export const package_health = async (
     );
   }
 
-  const known_issues_array = Object.entries(known_issues);
+  const known_issues_array = Object.entries(known_issues ?? {});
   if (known_issues_array.length > 0) {
     console.info("");
     console.info(
@@ -168,5 +205,5 @@ export const package_health = async (
 
   console.info("────────────────────────────────────");
 
-  return errors;
+  return { errors, package_info };
 };

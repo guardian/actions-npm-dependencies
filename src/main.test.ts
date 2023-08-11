@@ -28,7 +28,7 @@ Deno.test(
           new URL(import.meta.resolve("../fixtures/package_duplicate.json")),
         ).then((contents) => JSON.parse(contents));
 
-        const errors = await package_health(with_duplicates, {
+        const { errors } = await package_health(with_duplicates, {
           verbose: false,
         });
 
@@ -40,7 +40,7 @@ Deno.test(
           new URL(import.meta.resolve("../fixtures/package_typescript.json")),
         ).then((contents) => JSON.parse(contents));
 
-        const errors = await package_health(with_duplicates, {
+        const { errors } = await package_health(with_duplicates, {
           verbose: false,
         });
 
@@ -52,7 +52,7 @@ Deno.test(
           new URL(import.meta.resolve("../fixtures/package_valid.json")),
         ).then((contents) => JSON.parse(contents));
 
-        const errors = await package_health(with_duplicates, {
+        const { errors } = await package_health(with_duplicates, {
           verbose: false,
         });
 
@@ -60,7 +60,7 @@ Deno.test(
       });
 
       await test.step("dotcom-rendering", async () => {
-        const errors = await package_health(
+        const { errors } = await package_health(
           await get_package(
             "dotcom-rendering",
             "dotcom-rendering/package.json",

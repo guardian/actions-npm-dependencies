@@ -1,6 +1,6 @@
 import { colour, format } from "./colours.ts";
 import { Graph } from "./graph.ts";
-import { KnownIssues, Package, package_parser } from "./parser.ts";
+import { KnownIssues, Package, registry_package_parser } from "./parser.ts";
 import { testRange } from "https://deno.land/std@0.193.0/semver/test_range.ts";
 import { assertEquals } from "https://deno.land/std@0.193.0/testing/asserts.ts";
 import { get_identifier, Issues } from "./utils.ts";
@@ -24,8 +24,8 @@ export const get_unsatisfied_peer_dependencies = (
       of package_graph
         .values()
   ) {
-    for (const [name, version] of Object.entries(peerDependencies)) {
-      const is_optional = !!peerDependenciesMeta[name]?.optional;
+    for (const [name, version] of Object.entries(peerDependencies ?? {})) {
+      const is_optional = !!peerDependenciesMeta?.[name]?.optional;
       const local = tryParse(all_dependencies[name]);
 
       if (!local) {
@@ -68,7 +68,7 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
       new Map([
         [
           "one@1.2.3",
-          package_parser.parse({
+          registry_package_parser.parse({
             name: "one",
             version: "1.2.3",
             private: false,
@@ -90,7 +90,7 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
       new Map([
         [
           "one@1.2.3",
-          package_parser.parse({
+          registry_package_parser.parse({
             name: "one",
             version: "1.2.3",
             peerDependencies: {
@@ -118,7 +118,7 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
       new Map([
         [
           "one@1.2.3",
-          package_parser.parse({
+          registry_package_parser.parse({
             name: "one",
             version: "1.2.3",
             private: false,
@@ -150,7 +150,7 @@ Deno.test("get_unsatisfied_peer_dependencies", async (test) => {
       new Map([
         [
           "peer@0.1.1",
-          package_parser.parse({
+          registry_package_parser.parse({
             name: "mock",
             version: "0.0.0",
             private: false,

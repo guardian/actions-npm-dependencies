@@ -17,7 +17,7 @@ import { KnownIssues } from "./parser.ts";
  */
 export const get_dependencies_expressed_as_ranges = (
   package_info: Parameters<typeof get_all_dependencies>[0],
-  known_issues: KnownIssues,
+  known_issues: NonNullable<KnownIssues>,
 ): Issues =>
   get_all_dependencies(package_info).map(
     ([name, version]): Issue | undefined => {
