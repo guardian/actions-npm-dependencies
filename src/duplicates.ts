@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.185.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import { get_all_dependencies, Issues } from "./utils.ts";
 
 /**

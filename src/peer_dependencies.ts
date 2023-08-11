@@ -1,11 +1,11 @@
 import { colour, format } from "./colours.ts";
 import { Graph } from "./graph.ts";
 import { KnownIssues, Package, registry_package_parser } from "./parser.ts";
-import { testRange } from "https://deno.land/std@0.193.0/semver/test_range.ts";
-import { assertEquals } from "https://deno.land/std@0.193.0/testing/asserts.ts";
+import { testRange } from "https://deno.land/std@0.198.0/semver/test_range.ts";
+import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
 import { get_identifier, Issues } from "./utils.ts";
-import { parseRange } from "https://deno.land/std@0.193.0/semver/mod.ts";
-import { tryParse } from "https://deno.land/std@0.193.0/semver/try_parse.ts";
+import { parseRange } from "https://deno.land/std@0.198.0/semver/mod.ts";
+import { tryParse } from "https://deno.land/std@0.198.0/semver/try_parse.ts";
 
 export const get_unsatisfied_peer_dependencies = (
   { dependencies, devDependencies }: Pick<
