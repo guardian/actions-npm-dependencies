@@ -2,6 +2,8 @@
 
 Validate your NPM dependencies without installing Node (WIP)
 
+[Publint](https://publint.dev/@guardian/package-linter)
+
 ## How to get a health report for your `package.json`?
 
 ```
