@@ -1,12 +1,6 @@
 import { parse } from "https://deno.land/std@0.198.0/semver/mod.ts";
-import {
-  get_all_dependencies,
-  get_identifier,
-  Issue,
-  Issues,
-} from "./utils.ts";
+import { get_all_dependencies, Issue, Issues } from "./utils.ts";
 import { colour, format } from "./colours.ts";
-import { KnownIssues } from "./parser.ts";
 import { fetchJSON } from "./json.ts";
 import { npm } from "./parser.ts";
 import { ZodError } from "https://deno.land/x/zod@v3.21.4/index.ts";

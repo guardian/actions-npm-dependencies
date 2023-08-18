@@ -3,9 +3,10 @@ import { Graph } from "./graph.ts";
 import { KnownIssues, Package, registry_package_parser } from "./parser.ts";
 import { testRange } from "https://deno.land/std@0.198.0/semver/test_range.ts";
 import { assertEquals } from "https://deno.land/std@0.198.0/assert/mod.ts";
-import { get_identifier, Issues } from "./utils.ts";
+import { get_identifier, Issue, Issues } from "./utils.ts";
 import { parseRange } from "https://deno.land/std@0.198.0/semver/mod.ts";
 import { tryParse } from "https://deno.land/std@0.198.0/semver/try_parse.ts";
+import { satisfies } from "../npm/esm/deps/deno.land/std@0.185.0/semver/mod.d.ts";
 
 export const get_unsatisfied_peer_dependencies = (
   { dependencies, devDependencies }: Pick<
@@ -199,14 +200,13 @@ export const format_dependencies_issues = (
 ): void => {
   const grouped = unsatisfied.reduce(
     (map, issue) => {
-      const found = map.get(issue.name) ?? [];
-      found.push(issue);
+      const found: [Issue, ...Issues] = [...(map.get(issue.name) ?? []), issue];
       map.set(issue.name, found);
       return map;
     },
     new Map<
       string,
-      Issues
+      [Issue, ...Issues]
     >(),
   );
 
@@ -227,4 +227,30 @@ export const format_dependencies_issues = (
       );
     }
   }
+};
+
+export const get_missing_dependencies = (
+  unsatisfied: Issues,
+): Record<string, string> => {
+  const grouped = unsatisfied.reduce(
+    (map, issue) => {
+      const found = map.get(issue.name) ?? [issue];
+      found.push(issue);
+      map.set(issue.name, found);
+      return map;
+    },
+    new Map<
+      string,
+      [Issue, ...Issues]
+    >(),
+  );
+
+  const deps: Record<string, string> = {};
+
+  for (const [name, issues] of grouped.entries()) {
+    // const [first_issue] = issues;
+    deps[name] == "SOMETHING";
+  }
+
+  return deps;
 };
