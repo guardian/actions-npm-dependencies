@@ -25,4 +25,4 @@ export const get_all_dependencies = (
   >,
 ) =>
   [dependencies, devDependencies, optionalDependencies]
-    .flatMap((dependency) => Object.entries(dependency));
+    .flatMap((dependency) => Object.entries(dependency ?? {}));

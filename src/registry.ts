@@ -1,6 +1,6 @@
-import { format, SemVer } from "https://deno.land/std@0.193.0/semver/mod.ts";
+import { format, SemVer } from "https://deno.land/std@0.198.0/semver/mod.ts";
 import { fetchJSON } from "./json.ts";
-import { package_parser } from "./parser.ts";
+import { registry_package_parser } from "./parser.ts";
 import PQueue from "https://deno.land/x/p_queue@1.0.1/mod.ts";
 
 const queue = new PQueue({ concurrency: 24 });
@@ -16,7 +16,7 @@ export const get_registry_dependency = async (
   );
 
   const registry_dependency = await queue.add(() =>
-    fetchJSON(url, { parser: package_parser.parse })
+    fetchJSON(url, { parser: registry_package_parser.parse })
   );
 
   // We do not want to consider further

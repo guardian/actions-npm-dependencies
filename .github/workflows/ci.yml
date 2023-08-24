@@ -32,5 +32,5 @@ jobs:
         run: |
           deno test src \
             --allow-read=fixtures \
-            --allow-net=cdn.jsdelivr.net,raw.githubusercontent.com \
+            --allow-net=data.jsdelivr.com,cdn.jsdelivr.net,raw.githubusercontent.com \
             --allow-env=CI

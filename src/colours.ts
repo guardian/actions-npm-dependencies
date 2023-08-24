@@ -5,9 +5,9 @@ import {
   red,
   underline,
   yellow,
-} from "https://deno.land/std@0.185.0/fmt/colors.ts";
-import { SemVer } from "https://deno.land/std@0.193.0/semver/types.ts";
-import { format as formatSemVer } from "https://deno.land/std@0.193.0/semver/format.ts";
+} from "https://deno.land/std@0.198.0/fmt/colors.ts";
+import { SemVer } from "https://deno.land/std@0.198.0/semver/types.ts";
+import { format as formatSemVer } from "https://deno.land/std@0.198.0/semver/format.ts";
 
 export const colour = {
   dependency: cyan,
