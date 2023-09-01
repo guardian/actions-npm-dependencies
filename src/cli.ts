@@ -2,8 +2,7 @@ import { parse } from "https://deno.land/std@0.198.0/flags/mod.ts";
 import { colour } from "./colours.ts";
 import { package_health } from "./main.ts";
 import { resolve } from "https://deno.land/std@0.198.0/path/mod.ts";
-// @deno-types="npm:@types/prettier"
-import { format } from "npm:prettier";
+import { format } from "npm:prettier@3";
 
 const { _: [package_file], verbose, errors, dry } = parse(Deno.args, {
   boolean: ["verbose", "dry"],
