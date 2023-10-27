@@ -1,16 +1,17 @@
-# actions-npm-dependencies
+# The Guardian Package Linter
 
-Validate your NPM dependencies without installing Node (WIP)
+Lint your `package.json` in line with our recommendations for
+[dependencies](https://github.com/guardian/recommendations/blob/main/dependencies.md#javascript)
+and
+[packages](https://github.com/guardian/recommendations/blob/main/npm-packages.md).
 
-[Publint](https://publint.dev/@guardian/package-linter)
+**Please note** that in its current implementation, this linter will overwrite
+the `package.json` file that it processes.
 
-## How to get a health report for your `package.json`?
+Based on the value of the `private` field, the package will be interpreted as a
+`lib` or an `app`, and processed accordingly.
 
-### With Deno
-
-```sh
-deno run -A https://deno.land/x/guardian_package_linter@latest/src/cli.ts ./package.json
-```
+## Usage
 
 ### With Node
 
@@ -19,30 +20,28 @@ npm install @guardian/package-linter;
 npx package-linter ./package.json;
 ```
 
-## Todo
-
-- [x] Make it functional and composable
-- [x] Handle peer dependencies
-- [ ] Handle lock files? (probably not)
-- [x] Great error messaging
-- [ ] Investigate direct dependencies of dependencies, which may have peers
-      themselves
-- [ ] Give insight into possible resolution steps, including intersects
-
-## Shapes
-
-All sourced from
-[Geometric Shapes](https://en.wikipedia.org/wiki/Geometric_Shapes_(Unicode_block))
-and
-[Box-drawing characters](https://en.wikipedia.org/wiki/Box-drawing_character) on
-Wikipedia.
+### With Deno
 
 ```sh
-┌─┬┐  ╔═╦╗  ╓─╥╖  ╒═╤╕
-│ ││  ║ ║║  ║ ║║  │ ││
-├─┼┤  ╠═╬╣  ╟─╫╢  ╞═╪╡
-└─┴┘  ╚═╩╝  ╙─╨╜  ╘═╧╛
-╭─────────╮
-│ ○ △ □ × │
-╰─────────╯
+deno run -A https://deno.land/x/guardian_package_linter@latest/src/cli.ts ./package.json
 ```
+
+## Todo
+
+This tool is still a work in progress, and here’s a list of things that we hope
+it can solve in the future
+
+- [ ] Be explicit about missing peer dependencies and try installing them
+- [ ] Add a `--fix` flag and ensure it cannot be used in CI
+- [ ] Ensure that chosen licenses are appropriate
+- [ ] Improve distinctions between `app` and `lib`
+- [ ] Automatically pick matching `@types/*` packages if they exist
+- [ ] Rely on lock files to resolve version rather than the NPM registry
+- [ ] Node version specified in `.nvmrc` compatible with `@types/node`
+- [ ] Robust approach to handling known issues, and a way to evict them
+- [ ] Better suggestions on how to resolve peer dependencies mismatch, including
+      semver range intersections
+
+## Tooling
+
+See [Publint status](https://publint.dev/@guardian/package-linter)
