@@ -1,5 +1,5 @@
 // ex. scripts/build_npm.ts
-import { build, emptyDir } from "https://deno.land/x/dnt@0.38.0/mod.ts";
+import { build, emptyDir } from "https://deno.land/x/dnt@0.38.1/mod.ts";
 import { tag } from "./get_git_tag.ts";
 import { package_health } from "./main.ts";
 import { resolve } from "https://deno.land/std@0.198.0/path/mod.ts";
@@ -8,7 +8,7 @@ const dir = "./npm";
 
 await emptyDir(dir);
 await build({
-  entryPoints: ["./src/cli.ts"],
+  entryPoints: ["./src/main.ts", "./src/cli.ts"],
   outDir: dir,
   scriptModule: false,
   typeCheck: false,
@@ -23,9 +23,8 @@ await build({
       "The Guardian package linter that helps you follow our recommendations",
     license: "Apache-2",
     contributors: ["@aracho1", "@mxdvl"],
-    main: "esm/main.js",
     bin: {
-      "package-linter": "esm/cli.js",
+      "package-linter": "./esm/cli.mjs",
     },
     repository: {
       type: "git",
@@ -34,13 +33,20 @@ await build({
     bugs: {
       url: "https://github.com/guardian/actions-npm-dependencies/issues",
     },
-    dependencies: {
+    devDependencies: {
       "tslib": "2.6.2",
     },
   },
   postBuild: async () => {
     await Deno.copyFile("LICENSE", "npm/LICENSE");
     await Deno.copyFile("README.md", "npm/README.md");
+    await Deno.mkdir("npm/bin");
+    await Deno.writeTextFile(
+      "npm/esm/cli.mjs",
+      ["#!/usr/bin/env node", await Deno.readTextFile("npm/esm/cli.js")].join(
+        "\n\n",
+      ),
+    );
   },
 });
 

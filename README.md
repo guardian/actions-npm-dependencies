@@ -16,7 +16,7 @@ deno run -A https://deno.land/x/guardian_package_linter@latest/src/cli.ts ./pack
 
 ```sh
 npm install @guardian/package-linter;
-npx 
+npx package-linter ./package.json;
 ```
 
 ## Todo

@@ -28,9 +28,7 @@ if (!package_content) {
 
 const { errors: problems, package_info } = await package_health(
   package_content,
-  {
-    verbose,
-  },
+  { verbose },
 );
 
 if (package_info) {
