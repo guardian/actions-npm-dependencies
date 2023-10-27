@@ -20,8 +20,12 @@ await build({
     version: tag,
     description:
       "The Guardian package linter that helps you follow our recommendations",
-    license: "MIT",
+    license: "Apache-2",
     contributors: ["@aracho1", "@mxdvl"],
+    main: "esm/main.js",
+    bin: {
+      "package-linter": "esm/cli.js"
+    },
     repository: {
       type: "git",
       url: "git+https://github.com/guardian/actions-npm-dependencies.git",

@@ -6,16 +6,18 @@ Validate your NPM dependencies without installing Node (WIP)
 
 ## How to get a health report for your `package.json`?
 
-```
-deno run \
-    --allow-net=cdn.jsdelivr.net --allow-read=. \
-    https://deno.land/x/package_health/src/main.ts \
-    ./package.json  \
-    --cache
+### With Deno
+
+```sh
+deno run -A https://deno.land/x/guardian_package_linter@latest/src/cli.ts ./package.json
 ```
 
-> - The `--cache` flag should help with speedups
-> - The `--verbose` flag is very verbose
+### With Node
+
+```sh
+npm install @guardian/package-linter;
+npx 
+```
 
 ## Todo
 
