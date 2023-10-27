@@ -17,6 +17,7 @@ await build({
   },
   package: {
     name: "@guardian/package-linter",
+    private: false,
     version: tag,
     description:
       "The Guardian package linter that helps you follow our recommendations",
@@ -24,7 +25,7 @@ await build({
     contributors: ["@aracho1", "@mxdvl"],
     main: "esm/main.js",
     bin: {
-      "package-linter": "esm/cli.js"
+      "package-linter": "esm/cli.js",
     },
     repository: {
       type: "git",
@@ -33,11 +34,8 @@ await build({
     bugs: {
       url: "https://github.com/guardian/actions-npm-dependencies/issues",
     },
-    // We’re going to validate the output with out very own linter!
-    known_issues: {
-      "@deno/shim-deno@~0.16.1": ["because that’s the DNT way"],
-      "@types/node@^18.11.9": ["development dependency"],
-      "picocolors@^1.0.0": ["development dependency"],
+    dependencies: {
+      "tslib": "2.6.2",
     },
   },
   postBuild: async () => {
