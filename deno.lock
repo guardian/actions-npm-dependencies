@@ -2,12 +2,22 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "npm:prettier": "npm:prettier@3.0.3",
+      "npm:@guardian/libs@15.9.1": "npm:@guardian/libs@15.9.1_tslib@2.6.2",
       "npm:prettier@3": "npm:prettier@3.0.3"
     },
     "npm": {
+      "@guardian/libs@15.9.1_tslib@2.6.2": {
+        "integrity": "sha512-Mns6Gc3MQacVxQ44Ei5HaVak3y9HYQF5kZ4lZGnacJfRdWAfW9K5K5rphf7mSgqkygOGoTs5TMQ3gO37MP8hbw==",
+        "dependencies": {
+          "tslib": "tslib@2.6.2"
+        }
+      },
       "prettier@3.0.3": {
         "integrity": "sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==",
+        "dependencies": {}
+      },
+      "tslib@2.6.2": {
+        "integrity": "sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==",
         "dependencies": {}
       }
     }
@@ -256,8 +266,6 @@
     "https://deno.land/x/zod@v3.21.4/helpers/util.ts": "8baf19b19b2fca8424380367b90364b32503b6b71780269a6e3e67700bb02774",
     "https://deno.land/x/zod@v3.21.4/index.ts": "d27aabd973613985574bc31f39e45cb5d856aa122ef094a9f38a463b8ef1a268",
     "https://deno.land/x/zod@v3.21.4/locales/en.ts": "a7a25cd23563ccb5e0eed214d9b31846305ddbcdb9c5c8f508b108943366ab4c",
-    "https://deno.land/x/zod@v3.21.4/types.ts": "b5d061babea250de14fc63764df5b3afa24f2b088a1d797fc060ba49a0ddff28",
-    "https://esm.sh/@guardian/libs@15.6.1": "ecc0c28dec858b0e1d5da48a41d6298bea7280312058b1106345201e20b694ad",
-    "https://esm.sh/v131/@guardian/libs@15.6.1/denonext/libs.mjs": "d6e347666587d04cb0190434df64d69870affd5fa28dead31ae684a42edac938"
+    "https://deno.land/x/zod@v3.21.4/types.ts": "b5d061babea250de14fc63764df5b3afa24f2b088a1d797fc060ba49a0ddff28"
   }
 }

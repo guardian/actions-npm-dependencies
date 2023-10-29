@@ -8,7 +8,7 @@ import { get_types_in_direct_dependencies, mismatches } from "./types.ts";
 import { fetch_all_dependencies } from "./graph.ts";
 import { get_dependencies_expressed_as_ranges, make_exact } from "./exact.ts";
 import { find_duplicates } from "./duplicates.ts";
-import { isObject } from "https://esm.sh/@guardian/libs@15.6.1";
+import { isObject } from "npm:@guardian/libs@15.9.1";
 
 const triangle = colour.version("△");
 const cross = colour.invalid("✕");
