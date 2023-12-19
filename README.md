@@ -9,7 +9,10 @@ and
 > `package.json` file that it processes.
 
 Based on the value of the `private` field, the package will be interpreted as a
-`lib` or an `app`, and processed accordingly.
+library (`lib`) or an application (`app`) and processed accordingly:
+
+- **`lib`** if `private: false` as the package will be made public on publishing
+- **`app`** if `private: true`, as the package will stay private
 
 ## Usage
 
@@ -34,7 +37,7 @@ it can solve in the future
 - [ ] Be explicit about missing peer dependencies and try installing them
 - [ ] Add a `--fix` flag and ensure it cannot be used in CI
 - [ ] Ensure that chosen licenses are appropriate
-- [ ] Improve distinctions between `app` and `lib`
+- [X] Improve distinctions between `app` and `lib`
 - [ ] Automatically pick matching `@types/*` packages if they exist
 - [ ] Rely on lock files to resolve version rather than the NPM registry
 - [ ] Node version specified in `.nvmrc` compatible with `@types/node`
