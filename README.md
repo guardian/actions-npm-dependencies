@@ -23,7 +23,7 @@ npx package-linter ./package.json;
 ### With Deno
 
 ```sh
-deno run -A https://deno.land/x/guardian_package_linter@latest/src/cli.ts ./package.json
+deno run -A https://deno.land/x/guardian_package_linter/src/cli.ts ./package.json
 ```
 
 ## Todo
