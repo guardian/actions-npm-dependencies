@@ -5,8 +5,8 @@ Lint your `package.json` in line with our recommendations for
 and
 [packages](https://github.com/guardian/recommendations/blob/main/npm-packages.md).
 
-**Please note** that in its current implementation, this linter will overwrite
-the `package.json` file that it processes.
+> [!NOTE] In its current implementation, this linter will overwrite the
+> `package.json` file that it processes.
 
 Based on the value of the `private` field, the package will be interpreted as a
 `lib` or an `app`, and processed accordingly.
